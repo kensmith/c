@@ -274,7 +274,6 @@ var operators = map[string]Operator{
 		slices.Sort(*stack)
 		return 0.0, fmt.Errorf("sorted")
 	},
-	// TODO max min
 	"lor": func(stack *[]float64) (float64, error) {
 		// lorentz
 		top, err := pop1(stack)
