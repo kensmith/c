@@ -371,7 +371,7 @@ var operators = map[string]Operator{
 		return top / _wPerHp, nil
 	},
 	"pas": func(stack *[]float64) (float64, error) {
-		// pasteurization time in minutes for a given temperature in fahrenheit
+		// pasteurization time in seconds for a given temperature in fahrenheit
 		// derived from a curve fit of data
 		top, err := pop1(stack)
 		if err != nil {
