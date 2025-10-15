@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/rand"
 	"fmt"
 	"math"
+	"math/big"
 	"os"
 	"path/filepath"
 	"slices"
@@ -15,11 +17,12 @@ import (
 )
 
 const (
-	_ftPerM   = 3.280839895
-	_jPerFtLb = 1.3558179483314004
-	_lPerGal  = 3.785411784
-	_pPerKg   = 0.45359237
-	_wPerHp   = 745.699872
+	_ftPerM         = 3.280839895
+	_jPerFtLb       = 1.3558179483314004
+	_lPerGal        = 3.785411784
+	_pPerKg         = 0.45359237
+	_wPerHp         = 745.699872
+	_defaultMaxRand = math.MaxInt16
 )
 
 var (
@@ -135,6 +138,24 @@ var operators = map[string]Operator{
 			return 0.0, err
 		}
 		return top - 1, nil
+	},
+	"rn": func(stack *[]float64) (float64, error) {
+		top, err := pop1(stack)
+		if err != nil {
+			return 0.0, err
+		}
+		result, err := rand.Int(rand.Reader, big.NewInt(int64(top)))
+		if err != nil {
+			return 0.0, err
+		}
+		return float64(result.Int64()), nil
+	},
+	"r": func(stack *[]float64) (float64, error) {
+		result, err := rand.Int(rand.Reader, big.NewInt(int64(_defaultMaxRand)))
+		if err != nil {
+			return 0.0, err
+		}
+		return float64(result.Int64()), nil
 	},
 	"pow10": func(stack *[]float64) (float64, error) {
 		top, err := pop1(stack)
@@ -388,14 +409,6 @@ var operators = map[string]Operator{
 		}
 		return 29.9212524 * math.Pow(1-math.Pow(10, -5)*2.25577*(top/3.280839895), 5.25588), nil
 	},
-
-	/*
-	   func Sincos(x float64) (sin, cos float64)
-	   func Modf(f float64) (int float64, frac float64)
-
-	   func Frexp(f float64) (frac float64, exp int)
-	   func Ldexp(frac float64, exp int) float64
-	*/
 }
 
 var unaryFunctions = map[string]func(float64) float64{
@@ -534,6 +547,10 @@ func main() {
 	}()
 
 	stack := []float64{}
+	env := map[string]any{
+		"stack": &stack,
+		"s":     &stack,
+	}
 
 	for {
 		line, err := shell.Readline()
@@ -578,7 +595,7 @@ func main() {
 			case "q":
 				return
 			default:
-				output, err := expr.Eval(lineTrimmed, nil)
+				output, err := expr.Eval(lineTrimmed, env)
 				if err != nil {
 					fmt.Println(err)
 					continue
