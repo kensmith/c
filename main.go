@@ -554,12 +554,16 @@ func main() {
 		} else {
 			switch lineTrimmed {
 			case "sw":
+				fallthrough
+			case "swap":
 				err := swap(&stack)
 				if err != nil {
 					fmt.Println(err)
 					continue
 				}
 			case "p":
+				fallthrough
+			case "pop":
 				_, err := pop1(&stack)
 				if err != nil {
 					fmt.Println(err)
