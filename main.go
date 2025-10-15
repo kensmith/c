@@ -541,7 +541,8 @@ func main() {
 			// normal exit due to ctrl-c, ctrl-d
 			return
 		}
-		lineTrimmed := strings.TrimSpace(line)
+		commasRemoved := strings.ReplaceAll(line, ",", "")
+		lineTrimmed := strings.TrimSpace(commasRemoved)
 		rawOperator, ok := operators[lineTrimmed]
 		if ok {
 			result, err := rawOperator(&stack)
@@ -577,7 +578,7 @@ func main() {
 			case "q":
 				return
 			default:
-				output, err := expr.Eval(line, nil)
+				output, err := expr.Eval(lineTrimmed, nil)
 				if err != nil {
 					fmt.Println(err)
 					continue
