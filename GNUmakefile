@@ -31,13 +31,13 @@ deep \
   $(errcheck)
 
 # This will need to be restarted when code is added or removed.
-.PHONY: watch-build
-watch-build \
+.PHONY: watch
+watch \
 : \
 ; find $(code) $(MAKEFILE_LIST) | entr $(MAKE)
 
 $(binary) \
-: $(code-deps) $(tidy) $(generate) $(MAKEFILE_LIST) \
+: $(code) $(code-deps) $(tidy) $(generate) $(MAKEFILE_LIST) \
 | $(build-dir) \
 ; gofumpt -l -w .; go build -o $@ .
 
@@ -50,7 +50,7 @@ $(test) \
 ; exit $$exit_code
 
 $(generate) \
-: $(code-deps) $(MAKEFILE_LIST) \
+: $(code) $(code-deps) $(MAKEFILE_LIST) \
 | $(build-dir) \
 ; go generate > $@ 2>&1 \
 ; exit_code=$$? \
@@ -58,7 +58,7 @@ $(generate) \
 ; exit $$exit_code
 
 $(tidy) \
-: $(code-deps) $(MAKEFILE_LIST) \
+: $(code) $(code-deps) $(MAKEFILE_LIST) \
 | $(build-dir) \
 ; go mod tidy > $@ 2>&1 \
 ; exit_code=$$? \
@@ -137,6 +137,7 @@ $(build-dir)/code-deps.mk \
 
 $(build-dir)/code-deps-candidate.mk\
 : \
+| $(build-dir) \
 ; @echo checking for new or deleted code \
 ; echo $(code) > $@
 
