@@ -3,10 +3,13 @@ package main
 import (
 	"fmt"
 	"math"
+	"os"
+	"path/filepath"
 	"slices"
 	"strconv"
 	"strings"
 
+	"github.com/adrg/xdg"
 	"github.com/chzyer/readline"
 	"github.com/expr-lang/expr"
 )
@@ -17,6 +20,11 @@ const (
 	_lPerGal  = 3.785411784
 	_pPerKg   = 0.45359237
 	_wPerHp   = 745.699872
+)
+
+var (
+	_histDirname  = filepath.Join(xdg.StateHome, "github.com", "kensmith", "c")
+	_histFilename = filepath.Join(_histDirname, "history")
 )
 
 func pop1(stack *[]float64) (float64, error) {
@@ -502,10 +510,20 @@ func main() {
 		}
 	}
 
-	shell, err := readline.NewEx(&readline.Config{
-		Prompt:      "[  ]> ",
-		HistoryFile: ".history",
-	})
+	var shell *readline.Instance
+	err := os.MkdirAll(_histDirname, 0o750)
+	if err != nil {
+		fmt.Printf("history disabled due to inability to create directory: %s", _histDirname)
+		shell, err = readline.New("[  ]> ")
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		shell, err = readline.NewEx(&readline.Config{
+			Prompt:      "[  ]> ",
+			HistoryFile: _histFilename,
+		})
+	}
 	if err != nil {
 		panic(err)
 	}
@@ -547,6 +565,14 @@ func main() {
 					fmt.Println(err)
 					continue
 				}
+			case "cl":
+				fallthrough
+			case "clr":
+				fallthrough
+			case "clear":
+				stack = stack[:0]
+			case "q":
+				return
 			default:
 				output, err := expr.Eval(line, nil)
 				if err != nil {
