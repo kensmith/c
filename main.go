@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	operators := NewOperatorMap()
+	ops := NewOps()
 
 	shell := NewShell()
 	defer shell.Close()
@@ -19,10 +19,10 @@ func main() {
 		if len(line) <= 0 {
 			line = lastLine
 		}
-		err := tryCascade(line, stack, operators)
+		err := cascade(line, stack, ops)
 		if err != nil {
 			if len(lastLine) > 0 {
-				err = tryCascade(lastLine, stack, operators)
+				err = cascade(lastLine, stack, ops)
 				if err != nil {
 					fmt.Println(err)
 				}

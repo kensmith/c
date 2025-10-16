@@ -6,6 +6,7 @@ import (
 	"math"
 	"math/big"
 	"slices"
+	"strings"
 
 	"github.com/eclesh/welford"
 )
@@ -57,7 +58,7 @@ func (o *Ops) Run(line string, stack *Stack) error {
 	return fmt.Errorf("no operator '%s'", line)
 }
 
-func NewOps() Ops {
+func NewOps() *Ops {
 	ops := Ops{
 		opmap: OpMap{
 			"!":           factorialOp,
@@ -80,12 +81,14 @@ func NewOps() Ops {
 			"atan":        wrapUnaryOp("atan", "arctangent", math.Atan),
 			"atan2":       wrapBinaryOp("atan2", "tangent of y/x", math.Atan2),
 			"avg":         avgOp,
+			"c":           wrapConstant("c", "speed of light in m/s", 299792458),
 			"cbrt":        wrapUnaryOp("cbrt", "cube root", math.Cbrt),
 			"ceil":        wrapUnaryOp("ceil", "least integer value greater than or equal to stack.Top()", math.Ceil),
 			"cf":          cfOp,
 			"cos":         wrapUnaryOp("cos", "cosine", math.Cos),
 			"cosh":        wrapUnaryOp("cosh", "hyperbolic cosine", math.Cosh),
 			"dim":         wrapBinaryOp("dim", "maximum of x-y or 0", math.Dim),
+			"e":           wrapConstant("e", "euler's constant", math.E),
 			"erf":         wrapUnaryOp("erf", "error function", math.Erf),
 			"erfc":        wrapUnaryOp("erfc", "complementary error function", math.Erfc),
 			"erfcinv":     wrapUnaryOp("erfcinv", "inverse of erfc", math.Erfcinv),
@@ -103,6 +106,7 @@ func NewOps() Ops {
 			"hw":          hwOp,
 			"hypot":       wrapBinaryOp("hypot", "sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow", math.Hypot),
 			"ilogb":       ilogbOp,
+			"inf":         wrapConstant("inf", "positive infinity", math.Inf(1)),
 			"isinf":       isInfOp,
 			"isnan":       isNanOp,
 			"isninf":      isNInfOp,
@@ -131,6 +135,7 @@ func NewOps() Ops {
 			"pk":          pkOp,
 			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
 			"pow10":       pow10Op,
+			"pr":          prOp,
 			"r":           randOp,
 			"remainder":   wrapBinaryOp("remainder", "IEEE 754 floating-point remainder of x/y", math.Remainder),
 			"rn":          randNOp,
@@ -155,7 +160,7 @@ func NewOps() Ops {
 			"yn":          ynOp,
 		},
 	}
-	return ops
+	return &ops
 }
 
 var (
@@ -460,8 +465,7 @@ var (
 				return nil, err
 			}
 			topSq := top * top
-			c := constants["c"]
-			cSq := c * c
+			cSq := 89875517873681764.0
 			return Floats{1.0 / math.Sqrt(1-topSq/cSq)}, nil
 		},
 	}
@@ -581,6 +585,18 @@ var (
 			}
 			result := math.Pow10(int(top))
 			return Floats{result}, nil
+		},
+	}
+
+	prOp = Op{
+		"pr",
+		"pressure in inHg for a given altitude in feet",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{29.9212524 * math.Pow(1-math.Pow(10, -5)*2.25577*(top/3.280839895), 5.25588)}, nil
 		},
 	}
 
@@ -715,6 +731,16 @@ var (
 	}
 )
 
+func wrapConstant(name, doc string, value float64) Op {
+	return Op{
+		name,
+		doc,
+		func(stack *Stack) (Floats, error) {
+			return Floats{value}, nil
+		},
+	}
+}
+
 func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
 	return Op{
 		name,
@@ -760,194 +786,23 @@ func wrapTernaryOp(name, doc string, f func(float64, float64, float64) float64) 
 	}
 }
 
-/*
-func NewOpMap() OpMap {
-	ops := OpMap{
-		"!":       factorialOp,
-		"*":       mulOp,
-		"+":       plusOp,
-		"++":      incrOp,
-		"-":       minusOp,
-		"--":      decrOp,
-		"/":       divOp,
-		"<<":      leftShiftOp,
-		">>":      rightShiftOp,
-		"abs":     wrapUnaryOp("abs", "absolute value", math.Abs),
-		"ilogb":   ilogbOp,
-		"isinf":   isInfOp,
-		"isnan":   isNanOp,
-		"isninf":  isNInfOp,
-		"jn":      jnOp,
-		"neg":     negOp,
-		"pow10":   pow10Op,
-		"r":       randOp,
-		"rn":      randNOp,
-		"signbit": signbitOp,
-		"sw":      swapOp,
-		"swa":     swapOp,
-		"swap":    swapOp,
+func (o *Ops) OpNames() ([]string, int) {
+	names := make([]string, 0, len(o.opmap))
+	longest := math.MinInt
+	for name := range o.opmap {
+		names = append(names, name)
+		longest = max(longest, len(name))
 	}
-
-	return ops
+	slices.Sort(names)
+	return names, longest
 }
-*/
 
-func NewOperatorMap() OperatorMap {
-	operators := OperatorMap{
-		"pr": func(stack *Stack) (float64, error) {
-			// base atmospheric pressure in inHg for a given elevation in feet
-			// 29.9212524*pow(1-pow(10, -5)*2.25577*(x/3.280839895), 5.25588)
-			// from https://www.engineeringtoolbox.com/air-altitude-pressure-d_462.html
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return 29.9212524 * math.Pow(1-math.Pow(10, -5)*2.25577*(top/3.280839895), 5.25588), nil
-		},
+func (o *Ops) Help() string {
+	var b strings.Builder
+	names, longest := o.OpNames()
+	for _, name := range names {
+		verbs := fmt.Sprintf("%%-%ds - %%s\n", longest)
+		fmt.Fprintf(&b, verbs, name, o.opmap[name].doc)
 	}
-
-	installUnaryFunctions(operators)
-	installBinaryFunctions(operators)
-	installTernaryFunctions(operators)
-	installConstants(operators)
-
-	return operators
-}
-
-var unaryFunctions = map[string]func(float64) float64{
-	"abs":         math.Abs,
-	"acos":        math.Acos,
-	"acosh":       math.Acosh,
-	"asin":        math.Asin,
-	"asinh":       math.Asinh,
-	"atan":        math.Atan,
-	"cbrt":        math.Cbrt,
-	"ceil":        math.Ceil,
-	"cos":         math.Cos,
-	"cosh":        math.Cosh,
-	"erf":         math.Erf,
-	"erfc":        math.Erfc,
-	"erfcinv":     math.Erfcinv,
-	"erfinv":      math.Erfinv,
-	"exp":         math.Exp,
-	"exp2":        math.Exp2,
-	"expm1":       math.Expm1,
-	"floor":       math.Floor,
-	"gamma":       math.Gamma,
-	"j0":          math.J0,
-	"j1":          math.J1,
-	"log":         math.Log,
-	"log10":       math.Log10,
-	"log1p":       math.Log1p,
-	"log2":        math.Log2,
-	"logb":        math.Logb,
-	"round":       math.Round,
-	"roundtoeven": math.RoundToEven,
-	"sin":         math.Sin,
-	"sinh":        math.Sinh,
-	"sqrt":        math.Sqrt,
-	"tan":         math.Tan,
-	"tanh":        math.Tanh,
-	"trunc":       math.Trunc,
-	"y0":          math.Y0,
-	"y1":          math.Y1,
-}
-
-var binaryFunctions = map[string]func(float64, float64) float64{
-	"%":         math.Mod,
-	"**":        math.Pow,
-	"^":         math.Pow,
-	"atan2":     math.Atan2,
-	"dim":       math.Dim,
-	"hypot":     math.Hypot,
-	"mod":       math.Mod,
-	"nextafter": math.Nextafter,
-	"pow":       math.Pow,
-	"remainder": math.Remainder,
-}
-
-var ternaryFunctions = map[string]func(float64, float64, float64) float64{
-	"fma": math.FMA,
-}
-
-func wrapUnaryFunction(unary func(float64) float64) Operator {
-	return func(stack *Stack) (float64, error) {
-		top, err := stack.Pop()
-		if err != nil {
-			return 0.0, err
-		}
-		return unary(top), nil
-	}
-}
-
-func installUnaryFunctions(operators OperatorMap) {
-	for name, uFunc := range unaryFunctions {
-		operators[name] = wrapUnaryFunction(uFunc)
-	}
-}
-
-func installBinaryFunctions(operators OperatorMap) {
-	for name, bFunc := range binaryFunctions {
-		operators[name] = func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return bFunc(elems[0], elems[1]), nil
-		}
-	}
-}
-
-func installTernaryFunctions(operators OperatorMap) {
-	for name, tFunc := range ternaryFunctions {
-		operators[name] = func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(3)
-			if err != nil {
-				return 0.0, err
-			}
-			return tFunc(elems[0], elems[1], elems[2]), nil
-		}
-	}
-}
-
-/*
-func tryOp(line string, stack *Stack, ops OpMap) error {
-	rawOp, ok := ops[line]
-	if ok {
-		results, err := rawOp.f(stack)
-		if err != nil {
-			return err
-		}
-		for _, result := range results {
-			stack.Push(result)
-		}
-		return nil
-	}
-	return fmt.Errorf("no op '%s'", line)
-}
-*/
-
-func tryOperator(line string, stack *Stack, operators OperatorMap) error {
-	rawOperator, ok := operators[line]
-	if ok {
-		result, err := rawOperator(stack)
-		if err != nil {
-			fmt.Println(err)
-		} else {
-			stack.Push(result)
-		}
-		return nil
-	}
-	return fmt.Errorf("no operator '%s'", line)
-}
-
-func showHelp(operators OperatorMap) {
-	commands := make([]string, 0, len(operators))
-	for key := range operators {
-		commands = append(commands, key)
-	}
-	slices.Sort(commands)
-	for _, command := range commands {
-		fmt.Println(command)
-	}
+	return b.String()
 }

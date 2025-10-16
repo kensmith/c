@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func tryCommands(line string, stack *Stack, operators OperatorMap) error {
+func tryCommands(line string, stack *Stack, ops *Ops) error {
 	switch line {
 	case "h":
 		fallthrough
@@ -14,7 +14,7 @@ func tryCommands(line string, stack *Stack, operators OperatorMap) error {
 	case "hel":
 		fallthrough
 	case "help":
-		showHelp(operators)
+		fmt.Println(ops.Help())
 	case "sw":
 		fallthrough
 	case "swap":

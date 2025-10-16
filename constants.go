@@ -21,10 +21,8 @@ var (
 	_histFilename = filepath.Join(_histDirname, "history")
 )
 
+/*
 var constants = map[string]float64{
-	"c":       299792458,
-	"e":       math.E,
-	"inf":     math.Inf(1),
 	"ln10":    math.Ln10,
 	"ln2":     math.Ln2,
 	"log20e":  math.Log10E,
@@ -38,11 +36,4 @@ var constants = map[string]float64{
 	"sqrtphi": math.SqrtPhi,
 	"sqrtpi":  math.SqrtPi,
 }
-
-func installConstants(operators OperatorMap) {
-	for name, c := range constants {
-		operators[name] = func(stack *Stack) (float64, error) {
-			return c, nil
-		}
-	}
-}
+*/

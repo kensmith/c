@@ -330,7 +330,7 @@ func TestMin(t *testing.T) {
 func TestLor(t *testing.T) {
 	stack := NewStack()
 	ops := NewOps()
-	stack.Push(constants["c"] * 0.999)
+	stack.Push(299792458 * 0.999)
 	err := ops.Run("lor", stack)
 	assert.Nil(t, err)
 	assertClose(t, 22.36627204212937, stack.Top())
@@ -471,4 +471,37 @@ func TestPas(t *testing.T) {
 	err = ops.Run("pas", stack)
 	assert.Nil(t, err)
 	assertClose(t, 2.065010118739787, stack.Top())
+}
+
+func TestPr(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+
+	stack.Push(0)
+	err := ops.Run("pr", stack)
+	assert.Nil(t, err)
+	assertClose(t, 29.9212524, stack.Top())
+
+	stack.Push(1000)
+	err = ops.Run("pr", stack)
+	assert.Nil(t, err)
+	assertClose(t, 28.85568264604063, stack.Top())
+
+	stack.Push(10000)
+	err = ops.Run("pr", stack)
+	assert.Nil(t, err)
+	assertClose(t, 20.576973132332288, stack.Top())
+
+	stack.Push(35000)
+	err = ops.Run("pr", stack)
+	assert.Nil(t, err)
+	assertClose(t, 7.040615836647221, stack.Top())
+}
+
+func TestC(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	err := ops.Run("c", stack)
+	assert.Nil(t, err)
+	assertClose(t, 299792458, stack.Top())
 }
