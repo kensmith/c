@@ -85,24 +85,6 @@ func (s *Stack) String() string {
 	return b.String()
 }
 
-/*
-func (s *Stack) Max() float64 {
-	candidate := math.Inf(-1)
-	for _, n := range s.storage {
-		candidate = math.Max(candidate, n)
-	}
-	return candidate
-}
-
-func (s *Stack) Min() float64 {
-	candidate := math.Inf(1)
-	for _, n := range s.storage {
-		candidate = math.Min(candidate, n)
-	}
-	return candidate
-}
-*/
-
 func (s *Stack) Sort() {
 	slices.Sort(s.storage)
 }
