@@ -416,3 +416,12 @@ func TestLg(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 1, stack.Top())
 }
+
+func TestPk(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(175)
+	err := ops.Run("pk", stack)
+	assert.Nil(t, err)
+	assertClose(t, 79.37866475, stack.Top())
+}

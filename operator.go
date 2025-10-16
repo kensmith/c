@@ -123,6 +123,7 @@ func NewOps() Ops {
 			"neg":         negOp,
 			"nextafter":   wrapBinaryOp("nextafter", "next representable float64 value after x towards y", math.Nextafter),
 			"noop":        noOp,
+			"pk":          pkOp,
 			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
 			"pow10":       pow10Op,
 			"r":           randOp,
@@ -516,6 +517,18 @@ var (
 		},
 	}
 
+	pkOp = Op{
+		"pk",
+		"pounds to kilograms conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top * _pPerKg}, nil
+		},
+	}
+
 	pow10Op = Op{
 		"pow10",
 		"10^stack.Top()",
@@ -727,13 +740,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"pk": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top * _pPerKg, nil
-		},
 		"kp": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {
