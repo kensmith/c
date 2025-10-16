@@ -12,8 +12,6 @@ import (
 	"github.com/eclesh/welford"
 )
 
-// TODO add remaining math pkg funcs
-
 type (
 	Floats []float64
 
