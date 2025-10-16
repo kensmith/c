@@ -130,6 +130,7 @@ func NewOps() Ops {
 			"tan":         wrapUnaryOp("tan", "tangent", math.Tan),
 			"tanh":        wrapUnaryOp("tanh", "hyperbolic tangent", math.Tanh),
 			"trunc":       wrapUnaryOp("trunc", "integer value of stack.Top()", math.Trunc),
+			"var":         varOp,
 			"y0":          wrapUnaryOp("y0", "order-zero Bessel function of the second kind", math.Y0),
 			"y1":          wrapUnaryOp("y1", "order-one Bessel function of the second kind", math.Y1),
 			"yn":          ynOp,
@@ -464,6 +465,19 @@ var (
 		},
 	}
 
+	varOp = Op{
+		"var",
+		"variance of the entire stack",
+		func(stack *Stack) (Floats, error) {
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return Floats{stats.Variance()}, nil
+		},
+	}
+
 	ynOp = Op{
 		"yn",
 		"order-n Bessel function of the second kind",
@@ -556,14 +570,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"var": func(stack *Stack) (float64, error) {
-			stats := welford.New()
-			arr := stack.Copy()
-			for _, n := range arr {
-				stats.Add(n)
-			}
-			return stats.Variance(), nil
-		},
 		"max": func(stack *Stack) (float64, error) {
 			stats := welford.New()
 			arr := stack.Copy()
