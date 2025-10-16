@@ -92,6 +92,7 @@ func NewOps() Ops {
 			"exp2":        wrapUnaryOp("exp2", "2^x, the base-2 exponential", math.Exp2),
 			"expm1":       wrapUnaryOp("expm1", "e^x - 1, the base-e exponential of x minus 1. It is more accurate than exp - 1 when x is near zero", math.Expm1),
 			"fc":          fcOp,
+			"fj":          fjOp,
 			"floor":       wrapUnaryOp("floor", "greatest integer value less than or equal to stack.Top()", math.Floor),
 			"fm":          fmOp,
 			"fma":         wrapTernaryOp("fma", "fused multiply-add of x, y, and z", math.FMA),
@@ -299,6 +300,18 @@ var (
 				return nil, err
 			}
 			return Floats{(top - 32) * 5 / 9}, nil
+		},
+	}
+
+	fjOp = Op{
+		"fj",
+		"foot-lbs to joules conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top * _jPerFtLb}, nil
 		},
 	}
 
@@ -675,13 +688,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"fj": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top * _jPerFtLb, nil
-		},
 		"jf": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {
