@@ -272,3 +272,14 @@ func TestAvg(t *testing.T) {
 	assertClose(t, 2.5, stack.Top())
 	assert.Equal(t, stack.Len(), 7)
 }
+
+func TestSd(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	for i := range 6 {
+		stack.Push(float64(i))
+	}
+	err := ops.Run("sd", stack)
+	assert.Nil(t, err)
+	assertClose(t, 1.8708286933869707, stack.Top())
+}

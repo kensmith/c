@@ -118,6 +118,7 @@ func NewOps() Ops {
 			"rn":          randNOp,
 			"round":       wrapUnaryOp("round", "returns the nearest integer, rounding half away from zero", math.Round),
 			"roundtoeven": wrapUnaryOp("roundtoeven", "returns the nearest integer, rounding ties to even", math.RoundToEven),
+			"sd":          sdOp,
 			"signbit":     signbitOp,
 			"sin":         wrapUnaryOp("sin", "sine", math.Sin),
 			"sinh":        wrapUnaryOp("sinh", "hyperbolic sine", math.Sinh),
@@ -410,6 +411,22 @@ var (
 		},
 	}
 
+	sdOp = Op{
+		"sd",
+		"standard deviation of the entire stack",
+		func(stack *Stack) (Floats, error) {
+			if stack.Len() <= 1 {
+				return Floats{0}, nil
+			}
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return Floats{stats.Stddev()}, nil
+		},
+	}
+
 	sumOp = Op{
 		"sum",
 		"sum the entire stack",
@@ -539,25 +556,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"avg": func(stack *Stack) (float64, error) {
-			stats := welford.New()
-			arr := stack.Copy()
-			for _, n := range arr {
-				stats.Add(n)
-			}
-			return stats.Mean(), nil
-		},
-		"sd": func(stack *Stack) (float64, error) {
-			if stack.Len() <= 1 {
-				return 0.0, nil
-			}
-			stats := welford.New()
-			arr := stack.Copy()
-			for _, n := range arr {
-				stats.Add(n)
-			}
-			return stats.Stddev(), nil
-		},
 		"var": func(stack *Stack) (float64, error) {
 			stats := welford.New()
 			arr := stack.Copy()
