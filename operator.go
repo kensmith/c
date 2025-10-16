@@ -148,6 +148,7 @@ func NewOps() Ops {
 			"tanh":        wrapUnaryOp("tanh", "hyperbolic tangent", math.Tanh),
 			"trunc":       wrapUnaryOp("trunc", "integer value of stack.Top()", math.Trunc),
 			"var":         varOp,
+			"wh":          whOp,
 			"y0":          wrapUnaryOp("y0", "order-zero Bessel function of the second kind", math.Y0),
 			"y1":          wrapUnaryOp("y1", "order-one Bessel function of the second kind", math.Y1),
 			"yn":          ynOp,
@@ -676,6 +677,18 @@ var (
 		},
 	}
 
+	whOp = Op{
+		"wh",
+		"watts to horsepower conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top / _wPerHp}, nil
+		},
+	}
+
 	ynOp = Op{
 		"yn",
 		"order-n Bessel function of the second kind",
@@ -768,13 +781,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"wh": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top / _wPerHp, nil
-		},
 		"pas": func(stack *Stack) (float64, error) {
 			// pasteurization time in seconds for a given temperature in fahrenheit
 			// derived from a curve fit of data

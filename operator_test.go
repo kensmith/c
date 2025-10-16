@@ -443,3 +443,12 @@ func TestHw(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 745.699872, stack.Top())
 }
+
+func TestWh(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(745.699872)
+	err := ops.Run("wh", stack)
+	assert.Nil(t, err)
+	assertClose(t, 1, stack.Top())
+}
