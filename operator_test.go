@@ -353,3 +353,12 @@ func TestFc(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 20, stack.Top())
 }
+
+func TestCf(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(20)
+	err := ops.Run("cf", stack)
+	assert.Nil(t, err)
+	assertClose(t, 68, stack.Top())
+}

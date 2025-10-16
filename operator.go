@@ -80,6 +80,7 @@ func NewOps() Ops {
 			"avg":         avgOp,
 			"cbrt":        wrapUnaryOp("cbrt", "cube root", math.Cbrt),
 			"ceil":        wrapUnaryOp("ceil", "least integer value greater than or equal to stack.Top()", math.Ceil),
+			"cf":          cfOp,
 			"cos":         wrapUnaryOp("cos", "cosine", math.Cos),
 			"cosh":        wrapUnaryOp("cosh", "hyperbolic cosine", math.Cosh),
 			"dim":         wrapBinaryOp("dim", "maximum of x-y or 0", math.Dim),
@@ -115,6 +116,7 @@ func NewOps() Ops {
 			"mph":         mphOp,
 			"neg":         negOp,
 			"nextafter":   wrapBinaryOp("nextafter", "next representable float64 value after x towards y", math.Nextafter),
+			"noop":        noOp,
 			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
 			"pow10":       pow10Op,
 			"r":           randOp,
@@ -144,6 +146,14 @@ func NewOps() Ops {
 }
 
 var (
+	noOp = Op{
+		"noop",
+		"no op",
+		func(stack *Stack) (Floats, error) {
+			return nil, nil
+		},
+	}
+
 	factorialOp = Op{
 		"!",
 		"factorial (kind of, by way of gamma function)",
@@ -263,6 +273,18 @@ var (
 				stats.Add(n)
 			}
 			return Floats{stats.Mean()}, nil
+		},
+	}
+
+	cfOp = Op{
+		"cf",
+		"celcius to fahrenheit conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top*9/5 + 32}, nil
 		},
 	}
 
@@ -627,13 +649,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"cf": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return (top * 9 / 5) + 32, nil
-		},
 		"fm": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {
