@@ -110,6 +110,19 @@ var (
 		},
 	}
 
+	decrOp = Op{
+		"--",
+		"decrement",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+
+			return Floats{top - 1.0}, nil
+		},
+	}
+
 	divOp = Op{
 		"/",
 		"division",
@@ -166,6 +179,7 @@ func NewOpMap() OpMap {
 		"+":    plusOp,
 		"++":   incrOp,
 		"-":    minusOp,
+		"--":   decrOp,
 		"/":    divOp,
 		"<<":   leftShiftOp,
 		">>":   rightShiftOp,
@@ -180,13 +194,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"--": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top - 1, nil
-		},
 		"rn": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {
