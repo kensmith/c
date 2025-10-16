@@ -182,6 +182,15 @@ func TestIsInf(t *testing.T) {
 	assertClose(t, 1, stack.Top())
 }
 
+func TestIsNInf(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(math.Inf(-1))
+	err := tryOpCascade("isninf", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 1, stack.Top())
+}
+
 /*
 func TestPlus(t *testing.T) {
 	stack := NewStack()

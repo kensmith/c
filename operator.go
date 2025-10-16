@@ -184,6 +184,18 @@ var (
 		},
 	}
 
+	isNInfOp = Op{
+		"isninf",
+		"1 if stack.Top() is -Inf",
+		func(stack *Stack) (Floats, error) {
+			top := stack.Top()
+			if math.IsInf(top, -1) {
+				return Floats{1}, nil
+			}
+			return Floats{0}, nil
+		},
+	}
+
 	pow10Op = Op{
 		"pow10",
 		"10^stack.Top()",
@@ -276,6 +288,7 @@ func NewOpMap() OpMap {
 		"abs":     wrapUnaryOp("abs", "absolute value", math.Abs),
 		"ilogb":   ilogbOp,
 		"isinf":   isInfOp,
+		"isninf":  isNInfOp,
 		"neg":     negOp,
 		"pow10":   pow10Op,
 		"r":       randOp,
@@ -291,16 +304,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"isninf": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			if math.IsInf(top, -1) {
-				return 1.0, nil
-			}
-			return 0.0, nil
-		},
 		"isnan": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {
