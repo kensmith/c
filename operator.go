@@ -10,10 +10,17 @@ import (
 	"github.com/eclesh/welford"
 )
 
-type (
-	Operator func(*Stack) (float64, error)
+/*
+* Operator needs to remember:
+* - the stack
+* - the string which invokes it
+* - the function to invoke
+*   - this should return ([]float64, error)
+* - help text describing it for help display
+ */
 
-	// should probably be a struct instead of a raw map given all of the helper functions
+type (
+	Operator    func(*Stack) (float64, error)
 	OperatorMap map[string]Operator
 )
 
@@ -435,15 +442,19 @@ var ternaryFunctions = map[string]func(float64, float64, float64) float64{
 	"fma": math.FMA,
 }
 
+func wrapUnaryFunction(unary func(float64) float64) Operator {
+	return func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
+		if err != nil {
+			return 0.0, err
+		}
+		return unary(top), nil
+	}
+}
+
 func installUnaryFunctions(operators OperatorMap) {
 	for name, uFunc := range unaryFunctions {
-		operators[name] = func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return uFunc(top), nil
-		}
+		operators[name] = wrapUnaryFunction(uFunc)
 	}
 }
 

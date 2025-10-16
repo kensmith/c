@@ -23,7 +23,8 @@ all\
   $(vuln) \
   $(scc) \
 ; cat $(test) \
-; cat $(scc)
+; cat $(scc) \
+; date
 
 .PHONY: deep
 deep \
