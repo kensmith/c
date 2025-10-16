@@ -127,6 +127,7 @@ func NewOps() Ops {
 			"neg":         negOp,
 			"nextafter":   wrapBinaryOp("nextafter", "next representable float64 value after x towards y", math.Nextafter),
 			"noop":        noOp,
+			"pas":         pasOp,
 			"pk":          pkOp,
 			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
 			"pow10":       pow10Op,
@@ -158,14 +159,6 @@ func NewOps() Ops {
 }
 
 var (
-	noOp = Op{
-		"noop",
-		"no op",
-		func(stack *Stack) (Floats, error) {
-			return nil, nil
-		},
-	}
-
 	factorialOp = Op{
 		"!",
 		"factorial (kind of, by way of gamma function)",
@@ -546,6 +539,26 @@ var (
 		},
 	}
 
+	noOp = Op{
+		"noop",
+		"no op",
+		func(stack *Stack) (Floats, error) {
+			return nil, nil
+		},
+	}
+
+	pasOp = Op{
+		"pas",
+		"pasteurization time in seconds for a given temperature in fahrenheit",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{math.Exp(top*-0.231) * 1.23e15 * 60}, nil
+		},
+	}
+
 	pkOp = Op{
 		"pk",
 		"pounds to kilograms conversion",
@@ -781,15 +794,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"pas": func(stack *Stack) (float64, error) {
-			// pasteurization time in seconds for a given temperature in fahrenheit
-			// derived from a curve fit of data
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return math.Exp(top*-0.231) * 1.23e15 * 60, nil
-		},
 		"pr": func(stack *Stack) (float64, error) {
 			// base atmospheric pressure in inHg for a given elevation in feet
 			// 29.9212524*pow(1-pow(10, -5)*2.25577*(x/3.280839895), 5.25588)

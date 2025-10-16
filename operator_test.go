@@ -452,3 +452,23 @@ func TestWh(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 1, stack.Top())
 }
+
+func TestPas(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+
+	stack.Push(126)
+	err := ops.Run("pas", stack)
+	assert.Nil(t, err)
+	assertClose(t, 16884.226578295245, stack.Top())
+
+	stack.Push(132)
+	err = ops.Run("pas", stack)
+	assert.Nil(t, err)
+	assertClose(t, 4222.299342426824, stack.Top())
+
+	stack.Push(165)
+	err = ops.Run("pas", stack)
+	assert.Nil(t, err)
+	assertClose(t, 2.065010118739787, stack.Top())
+}
