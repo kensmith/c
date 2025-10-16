@@ -97,6 +97,7 @@ func NewOps() Ops {
 			"fm":          fmOp,
 			"fma":         wrapTernaryOp("fma", "fused multiply-add of x, y, and z", math.FMA),
 			"gamma":       wrapUnaryOp("gamma", "gamma function ", math.Gamma),
+			"gl":          glOp,
 			"hypot":       wrapBinaryOp("hypot", "sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow", math.Hypot),
 			"ilogb":       ilogbOp,
 			"isinf":       isInfOp,
@@ -104,6 +105,7 @@ func NewOps() Ops {
 			"isninf":      isNInfOp,
 			"j0":          wrapUnaryOp("j0", "order-zero Bessel function of the first kind", math.J0),
 			"j1":          wrapUnaryOp("j1", "order-one Bessel function of the first kind", math.J1),
+			"jf":          jfOp,
 			"jn":          jnOp,
 			"log":         wrapUnaryOp("log", "natural logarithm", math.Log),
 			"log10":       wrapUnaryOp("log10", "decimal logarithm", math.Log10),
@@ -327,6 +329,18 @@ var (
 		},
 	}
 
+	glOp = Op{
+		"gl",
+		"gallons to liters conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top * _lPerGal}, nil
+		},
+	}
+
 	ilogbOp = Op{
 		"ilogb",
 		"binary exponent of stack.Top()",
@@ -373,6 +387,18 @@ var (
 				return Floats{1}, nil
 			}
 			return Floats{0}, nil
+		},
+	}
+
+	jfOp = Op{
+		"jf",
+		"joules to foot-lbs conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top / _jPerFtLb}, nil
 		},
 	}
 
@@ -688,20 +714,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"jf": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top / _jPerFtLb, nil
-		},
-		"gl": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top * _lPerGal, nil
-		},
 		"lg": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {

@@ -389,3 +389,21 @@ func TestFj(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 4067.453844994201, stack.Top())
 }
+
+func TestJf(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(4067.453844994201)
+	err := ops.Run("jf", stack)
+	assert.Nil(t, err)
+	assertClose(t, 3000, stack.Top())
+}
+
+func TestGl(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(1)
+	err := ops.Run("gl", stack)
+	assert.Nil(t, err)
+	assertClose(t, 3.785411783999999890, stack.Top())
+}
