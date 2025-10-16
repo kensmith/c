@@ -100,6 +100,7 @@ func NewOps() Ops {
 			"fma":         wrapTernaryOp("fma", "fused multiply-add of x, y, and z", math.FMA),
 			"gamma":       wrapUnaryOp("gamma", "gamma function ", math.Gamma),
 			"gl":          glOp,
+			"hw":          hwOp,
 			"hypot":       wrapBinaryOp("hypot", "sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow", math.Hypot),
 			"ilogb":       ilogbOp,
 			"isinf":       isInfOp,
@@ -343,6 +344,18 @@ var (
 				return nil, err
 			}
 			return Floats{top * _lPerGal}, nil
+		},
+	}
+
+	hwOp = Op{
+		"hw",
+		"horsepower to watts conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top * _wPerHp}, nil
 		},
 	}
 
@@ -755,13 +768,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"hw": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top * _wPerHp, nil
-		},
 		"wh": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {

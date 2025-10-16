@@ -434,3 +434,12 @@ func TestKp(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 175, stack.Top())
 }
+
+func TestHw(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(1)
+	err := ops.Run("hw", stack)
+	assert.Nil(t, err)
+	assertClose(t, 745.699872, stack.Top())
+}
