@@ -425,3 +425,12 @@ func TestPk(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 79.37866475, stack.Top())
 }
+
+func TestKp(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(79.37866475)
+	err := ops.Run("kp", stack)
+	assert.Nil(t, err)
+	assertClose(t, 175, stack.Top())
+}

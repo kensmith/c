@@ -10,6 +10,8 @@ import (
 	"github.com/eclesh/welford"
 )
 
+// TODO add remaining math pkg funcs
+
 /*
 * Operator needs to remember:
 * - the stack
@@ -107,6 +109,7 @@ func NewOps() Ops {
 			"j1":          wrapUnaryOp("j1", "order-one Bessel function of the first kind", math.J1),
 			"jf":          jfOp,
 			"jn":          jnOp,
+			"kp":          kpOp,
 			"lg":          lgOp,
 			"log":         wrapUnaryOp("log", "natural logarithm", math.Log),
 			"log10":       wrapUnaryOp("log10", "decimal logarithm", math.Log10),
@@ -414,6 +417,18 @@ var (
 			}
 			result := math.Jn(int(elems[0]), elems[1])
 			return Floats{result}, nil
+		},
+	}
+
+	kpOp = Op{
+		"kp",
+		"kilograms to pounds conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top / _pPerKg}, nil
 		},
 	}
 
@@ -740,13 +755,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"kp": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top / _pPerKg, nil
-		},
 		"hw": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {
