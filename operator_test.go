@@ -344,3 +344,12 @@ func TestMissingOp(t *testing.T) {
 	assert.NotNil(t, err)
 	assertClose(t, 10, stack.Top())
 }
+
+func TestFc(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(68)
+	err := ops.Run("fc", stack)
+	assert.Nil(t, err)
+	assertClose(t, 20, stack.Top())
+}
