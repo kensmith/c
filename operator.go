@@ -94,6 +94,7 @@ func NewOps() *Ops {
 			"floor":       wrapUnaryOp("greatest integer value less than or equal to stack.Top()", math.Floor),
 			"fm":          fmOp,
 			"fma":         wrapTernaryOp("fused multiply-add of x, y, and z", math.FMA),
+			"frexp":       frexpOp,
 			"gamma":       wrapUnaryOp("gamma function ", math.Gamma),
 			"gl":          glOp,
 			"hw":          hwOp,
@@ -342,6 +343,18 @@ var (
 				return nil, err
 			}
 			return Floats{top / _ftPerM}, nil
+		},
+	}
+
+	frexpOp = Op{
+		"breaks stack.Top() into a normalized fraction and an integral power of two",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			frac, exp := math.Frexp(top)
+			return Floats{frac, float64(exp)}, nil
 		},
 	}
 

@@ -529,3 +529,16 @@ func TestSortOp(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, 4.0, stack.Top())
 }
+
+func TestFrexp(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(1234.5678)
+	assert.Equal(t, 1, stack.Len())
+	err := ops.Run("frexp", stack)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, stack.Len())
+	assertClose(t, 11, stack.Top())
+	_, _ = stack.Pop()
+	assertClose(t, 0.60281630859375, stack.Top())
+}
