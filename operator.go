@@ -108,6 +108,7 @@ func NewOps() Ops {
 			"logb":        wrapUnaryOp("logb", "binary exponent", math.Logb),
 			"max":         maxOp,
 			"mil":         milOp,
+			"min":         minOp,
 			"mod":         wrapBinaryOp("mod", "floating-point remainder of x/y", math.Mod),
 			"mph":         mphOp,
 			"neg":         negOp,
@@ -354,6 +355,19 @@ var (
 		},
 	}
 
+	minOp = Op{
+		"min",
+		"find the minimum value of the entire stack",
+		func(stack *Stack) (Floats, error) {
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return Floats{stats.Min()}, nil
+		},
+	}
+
 	mphOp = Op{
 		"mph",
 		"given yards to target and target speed in millradians per second, return target speed in mph",
@@ -584,14 +598,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"min": func(stack *Stack) (float64, error) {
-			stats := welford.New()
-			arr := stack.Copy()
-			for _, n := range arr {
-				stats.Add(n)
-			}
-			return stats.Min(), nil
-		},
 		"lor": func(stack *Stack) (float64, error) {
 			// lorentz
 			top, err := stack.Pop()

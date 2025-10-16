@@ -310,3 +310,19 @@ func TestMax(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 1000, stack.Top())
 }
+
+func TestMin(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(-1000)
+
+	for range 10 {
+		stack.Push(99)
+		err := ops.Run("rn", stack)
+		assert.Nil(t, err)
+	}
+
+	err := ops.Run("min", stack)
+	assert.Nil(t, err)
+	assertClose(t, -1000, stack.Top())
+}
