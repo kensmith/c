@@ -106,6 +106,7 @@ func NewOps() Ops {
 			"log1p":       wrapUnaryOp("log1p", "natural logarithm of 1 plus its argument x. It is more accurate than log(1 + x) when x is near zero", math.Log1p),
 			"log2":        wrapUnaryOp("log2", "binary logarithm", math.Log2),
 			"logb":        wrapUnaryOp("logb", "binary exponent", math.Logb),
+			"max":         maxOp,
 			"mil":         milOp,
 			"mod":         wrapBinaryOp("mod", "floating-point remainder of x/y", math.Mod),
 			"mph":         mphOp,
@@ -321,6 +322,19 @@ var (
 			}
 			result := math.Jn(int(elems[0]), elems[1])
 			return Floats{result}, nil
+		},
+	}
+
+	maxOp = Op{
+		"max",
+		"find the maximum value of the entire stack",
+		func(stack *Stack) (Floats, error) {
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return Floats{stats.Max()}, nil
 		},
 	}
 
@@ -570,14 +584,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"max": func(stack *Stack) (float64, error) {
-			stats := welford.New()
-			arr := stack.Copy()
-			for _, n := range arr {
-				stats.Add(n)
-			}
-			return stats.Max(), nil
-		},
 		"min": func(stack *Stack) (float64, error) {
 			stats := welford.New()
 			arr := stack.Copy()

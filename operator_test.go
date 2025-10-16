@@ -294,3 +294,19 @@ func TestVar(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 3.5, stack.Top())
 }
+
+func TestMax(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(1000)
+
+	for range 10 {
+		stack.Push(99)
+		err := ops.Run("rn", stack)
+		assert.Nil(t, err)
+	}
+
+	err := ops.Run("max", stack)
+	assert.Nil(t, err)
+	assertClose(t, 1000, stack.Top())
+}
