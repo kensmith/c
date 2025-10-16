@@ -106,6 +106,7 @@ func NewOps() Ops {
 			"log1p":       wrapUnaryOp("log1p", "natural logarithm of 1 plus its argument x. It is more accurate than log(1 + x) when x is near zero", math.Log1p),
 			"log2":        wrapUnaryOp("log2", "binary logarithm", math.Log2),
 			"logb":        wrapUnaryOp("logb", "binary exponent", math.Logb),
+			"lor":         lorOp,
 			"max":         maxOp,
 			"mil":         milOp,
 			"min":         minOp,
@@ -323,6 +324,21 @@ var (
 			}
 			result := math.Jn(int(elems[0]), elems[1])
 			return Floats{result}, nil
+		},
+	}
+
+	lorOp = Op{
+		"lor",
+		"lorentz factor",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			topSq := top * top
+			c := constants["c"]
+			cSq := c * c
+			return Floats{1.0 / math.Sqrt(1-topSq/cSq)}, nil
 		},
 	}
 
@@ -598,17 +614,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"lor": func(stack *Stack) (float64, error) {
-			// lorentz
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			top_sq := top * top
-			c := constants["c"]
-			c_sq := c * c
-			return 1.0 / math.Sqrt(1-top_sq/c_sq), nil
-		},
 		"fc": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {

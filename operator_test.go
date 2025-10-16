@@ -124,7 +124,7 @@ func TestRandN(t *testing.T) {
 	stack.Push(100)
 	err := ops.Run("rn", stack)
 	assert.Nil(t, err)
-	assert.Greater(t, stack.Top(), 0.0)
+	assert.GreaterOrEqual(t, stack.Top(), 0.0)
 	assert.Less(t, stack.Top(), 100.0)
 }
 
@@ -325,4 +325,22 @@ func TestMin(t *testing.T) {
 	err := ops.Run("min", stack)
 	assert.Nil(t, err)
 	assertClose(t, -1000, stack.Top())
+}
+
+func TestLor(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(constants["c"] * 0.999)
+	err := ops.Run("lor", stack)
+	assert.Nil(t, err)
+	assertClose(t, 22.36627204212937, stack.Top())
+}
+
+func TestMissingOp(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(10)
+	err := ops.Run("missing op", stack)
+	assert.NotNil(t, err)
+	assertClose(t, 10, stack.Top())
 }
