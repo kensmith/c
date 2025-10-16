@@ -118,6 +118,16 @@ func TestDecr(t *testing.T) {
 	assertClose(t, 9, stack.Top())
 }
 
+func TestRandN(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(100)
+	err := tryOpCascade("rn", stack, ops)
+	assert.Nil(t, err)
+	assert.Greater(t, stack.Top(), 0.0)
+	assert.Less(t, stack.Top(), 100.0)
+}
+
 /*
 func TestPlus(t *testing.T) {
 	stack := NewStack()

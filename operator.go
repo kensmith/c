@@ -159,6 +159,22 @@ var (
 		},
 	}
 
+	randNOp = Op{
+		"rn",
+		"random number from 0 to stack.Top()",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			result, err := rand.Int(rand.Reader, big.NewInt(int64(top)))
+			if err != nil {
+				return nil, err
+			}
+			return Floats{float64(result.Int64())}, nil
+		},
+	}
+
 	swapOp = Op{
 		"sw",
 		"swap the top two elements",
@@ -184,6 +200,7 @@ func NewOpMap() OpMap {
 		"<<":   leftShiftOp,
 		">>":   rightShiftOp,
 		"abs":  wrapUnaryOp("abs", "absolute value", math.Abs),
+		"rn":   randNOp,
 		"sw":   swapOp,
 		"swa":  swapOp,
 		"swap": swapOp,
