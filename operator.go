@@ -55,6 +55,84 @@ func (o *Ops) Run(line string, stack *Stack) error {
 	return fmt.Errorf("no operator '%s'", line)
 }
 
+func NewOps() Ops {
+	ops := Ops{
+		opmap: OpMap{
+			"!":           factorialOp,
+			"%":           wrapBinaryOp("%", "floating-point remainder of x/y", math.Mod),
+			"*":           mulOp,
+			"**":          wrapBinaryOp("**", "x^y, the base-x exponential of y", math.Pow),
+			"+":           plusOp,
+			"++":          incrOp,
+			"-":           minusOp,
+			"--":          decrOp,
+			"/":           divOp,
+			"<<":          leftShiftOp,
+			">>":          rightShiftOp,
+			"^":           wrapBinaryOp("^", "x^y, the base-x exponential of y", math.Pow),
+			"abs":         wrapUnaryOp("abs", "absolute value", math.Abs),
+			"acos":        wrapUnaryOp("acos", "arccosine, in radians", math.Acos),
+			"acosh":       wrapUnaryOp("acosh", "inverse hyperbolic cosine", math.Acosh),
+			"asin":        wrapUnaryOp("asin", "arcsine", math.Asin),
+			"asinh":       wrapUnaryOp("asinh", "inverse hyperbolic sine ", math.Asinh),
+			"atan":        wrapUnaryOp("atan", "arctangent", math.Atan),
+			"atan2":       wrapBinaryOp("atan2", "tangent of y/x", math.Atan2),
+			"cbrt":        wrapUnaryOp("cbrt", "cube root", math.Cbrt),
+			"ceil":        wrapUnaryOp("ceil", "least integer value greater than or equal to stack.Top()", math.Ceil),
+			"cos":         wrapUnaryOp("cos", "cosine", math.Cos),
+			"cosh":        wrapUnaryOp("cosh", "hyperbolic cosine", math.Cosh),
+			"dim":         wrapBinaryOp("dim", "maximum of x-y or 0", math.Dim),
+			"erf":         wrapUnaryOp("erf", "error function", math.Erf),
+			"erfc":        wrapUnaryOp("erfc", "complementary error function", math.Erfc),
+			"erfcinv":     wrapUnaryOp("erfcinv", "inverse of erfc", math.Erfcinv),
+			"erfinv":      wrapUnaryOp("erfinv", "inverse error function", math.Erfinv),
+			"exp":         wrapUnaryOp("exp", "e^x, the base-e exponential", math.Exp),
+			"exp2":        wrapUnaryOp("exp2", "2^x, the base-2 exponential", math.Exp2),
+			"expm1":       wrapUnaryOp("expm1", "e^x - 1, the base-e exponential of x minus 1. It is more accurate than exp - 1 when x is near zero", math.Expm1),
+			"floor":       wrapUnaryOp("floor", "greatest integer value less than or equal to stack.Top()", math.Floor),
+			"fma":         wrapTernaryOp("fma", "fused multiply-add of x, y, and z", math.FMA),
+			"gamma":       wrapUnaryOp("gamma", "gamma function ", math.Gamma),
+			"hypot":       wrapBinaryOp("hypot", "sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow", math.Hypot),
+			"ilogb":       ilogbOp,
+			"isinf":       isInfOp,
+			"isnan":       isNanOp,
+			"isninf":      isNInfOp,
+			"j0":          wrapUnaryOp("j0", "order-zero Bessel function of the first kind", math.J0),
+			"j1":          wrapUnaryOp("j1", "order-one Bessel function of the first kind", math.J1),
+			"jn":          jnOp,
+			"log":         wrapUnaryOp("log", "natural logarithm", math.Log),
+			"log10":       wrapUnaryOp("log10", "decimal logarithm", math.Log10),
+			"log1p":       wrapUnaryOp("log1p", "natural logarithm of 1 plus its argument x. It is more accurate than log(1 + x) when x is near zero", math.Log1p),
+			"log2":        wrapUnaryOp("log2", "binary logarithm", math.Log2),
+			"logb":        wrapUnaryOp("logb", "binary exponent", math.Logb),
+			"mod":         wrapBinaryOp("mod", "floating-point remainder of x/y", math.Mod),
+			"neg":         negOp,
+			"nextafter":   wrapBinaryOp("nextafter", "next representable float64 value after x towards y", math.Nextafter),
+			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
+			"pow10":       pow10Op,
+			"r":           randOp,
+			"remainder":   wrapBinaryOp("remainder", "IEEE 754 floating-point remainder of x/y", math.Remainder),
+			"rn":          randNOp,
+			"round":       wrapUnaryOp("round", "returns the nearest integer, rounding half away from zero", math.Round),
+			"roundtoeven": wrapUnaryOp("roundtoeven", "returns the nearest integer, rounding ties to even", math.RoundToEven),
+			"signbit":     signbitOp,
+			"sin":         wrapUnaryOp("sin", "sine", math.Sin),
+			"sinh":        wrapUnaryOp("sinh", "hyperbolic sine", math.Sinh),
+			"sqrt":        wrapUnaryOp("sqrt", "square root", math.Sqrt),
+			"sw":          swapOp,
+			"swa":         swapOp,
+			"swap":        swapOp,
+			"tan":         wrapUnaryOp("tan", "tangent", math.Tan),
+			"tanh":        wrapUnaryOp("tanh", "hyperbolic tangent", math.Tanh),
+			"trunc":       wrapUnaryOp("trunc", "integer value of stack.Top()", math.Trunc),
+			"y0":          wrapUnaryOp("y0", "order-zero Bessel function of the second kind", math.Y0),
+			"y1":          wrapUnaryOp("y1", "order-one Bessel function of the second kind", math.Y1),
+			"yn":          ynOp,
+		},
+	}
+	return ops
+}
+
 func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
 	return Op{
 		name,
@@ -65,6 +143,36 @@ func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
 				return nil, err
 			}
 			result := f(top)
+			return Floats{result}, nil
+		},
+	}
+}
+
+func wrapBinaryOp(name, doc string, f func(float64, float64) float64) Op {
+	return Op{
+		name,
+		doc,
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopN(2)
+			if err != nil {
+				return nil, err
+			}
+			result := f(elems[0], elems[1])
+			return Floats{result}, nil
+		},
+	}
+}
+
+func wrapTernaryOp(name, doc string, f func(float64, float64, float64) float64) Op {
+	return Op{
+		name,
+		doc,
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopN(3)
+			if err != nil {
+				return nil, err
+			}
+			result := f(elems[0], elems[1], elems[2])
 			return Floats{result}, nil
 		},
 	}
@@ -318,38 +426,19 @@ var (
 			return Floats{-top}, nil
 		},
 	}
-)
 
-func NewOps() Ops {
-	ops := Ops{
-		opmap: OpMap{
-			"!":       factorialOp,
-			"*":       mulOp,
-			"+":       plusOp,
-			"++":      incrOp,
-			"-":       minusOp,
-			"--":      decrOp,
-			"/":       divOp,
-			"<<":      leftShiftOp,
-			">>":      rightShiftOp,
-			"abs":     wrapUnaryOp("abs", "absolute value", math.Abs),
-			"ilogb":   ilogbOp,
-			"isinf":   isInfOp,
-			"isnan":   isNanOp,
-			"isninf":  isNInfOp,
-			"jn":      jnOp,
-			"neg":     negOp,
-			"pow10":   pow10Op,
-			"r":       randOp,
-			"rn":      randNOp,
-			"signbit": signbitOp,
-			"sw":      swapOp,
-			"swa":     swapOp,
-			"swap":    swapOp,
+	ynOp = Op{
+		"yn",
+		"order-n Bessel function of the second kind",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopN(2)
+			if err != nil {
+				return nil, err
+			}
+			return Floats{math.Yn(int(elems[0]), elems[1])}, nil
 		},
 	}
-	return ops
-}
+)
 
 /*
 func NewOpMap() OpMap {
@@ -385,13 +474,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"yn": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return math.Yn(int(elems[0]), elems[1]), nil
-		},
 		"mil": func(stack *Stack) (float64, error) {
 			elems, err := stack.PopR(2)
 			if err != nil {
