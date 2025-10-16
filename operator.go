@@ -111,6 +111,7 @@ func NewOps() Ops {
 			"logb":        wrapUnaryOp("logb", "binary exponent", math.Logb),
 			"lor":         lorOp,
 			"max":         maxOp,
+			"mf":          mfOp,
 			"mil":         milOp,
 			"min":         minOp,
 			"mod":         wrapBinaryOp("mod", "floating-point remainder of x/y", math.Mod),
@@ -403,6 +404,18 @@ var (
 		},
 	}
 
+	mfOp = Op{
+		"mf",
+		"meters to feet conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top * _ftPerM}, nil
+		},
+	}
+
 	milOp = Op{
 		"mil",
 		"given yards to target and target speed in mph, return target speed in millradians per second (multiply result by time of flight for lead)",
@@ -662,13 +675,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"mf": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top * _ftPerM, nil
-		},
 		"fj": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {

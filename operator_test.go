@@ -371,3 +371,12 @@ func TestFm(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 3.048, stack.Top())
 }
+
+func TestMf(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(3.048)
+	err := ops.Run("mf", stack)
+	assert.Nil(t, err)
+	assertClose(t, 10, stack.Top())
+}
