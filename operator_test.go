@@ -228,3 +228,23 @@ func TestJn(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 0.11490348493190049, stack.Top())
 }
+
+func TestMil(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(440)
+	stack.Push(2)
+	err := ops.Run("mil", stack)
+	assert.Nil(t, err)
+	assertClose(t, 2.22221856425409, stack.Top())
+}
+
+func TestMPH(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(440)
+	stack.Push(2.22221856425409)
+	err := ops.Run("mph", stack)
+	assert.Nil(t, err)
+	assertClose(t, 2, stack.Top())
+}

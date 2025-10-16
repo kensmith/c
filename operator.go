@@ -105,7 +105,9 @@ func NewOps() Ops {
 			"log1p":       wrapUnaryOp("log1p", "natural logarithm of 1 plus its argument x. It is more accurate than log(1 + x) when x is near zero", math.Log1p),
 			"log2":        wrapUnaryOp("log2", "binary logarithm", math.Log2),
 			"logb":        wrapUnaryOp("logb", "binary exponent", math.Logb),
+			"mil":         milOp,
 			"mod":         wrapBinaryOp("mod", "floating-point remainder of x/y", math.Mod),
+			"mph":         mphOp,
 			"neg":         negOp,
 			"nextafter":   wrapBinaryOp("nextafter", "next representable float64 value after x towards y", math.Nextafter),
 			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
@@ -131,51 +133,6 @@ func NewOps() Ops {
 		},
 	}
 	return ops
-}
-
-func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
-	return Op{
-		name,
-		doc,
-		func(stack *Stack) (Floats, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return nil, err
-			}
-			result := f(top)
-			return Floats{result}, nil
-		},
-	}
-}
-
-func wrapBinaryOp(name, doc string, f func(float64, float64) float64) Op {
-	return Op{
-		name,
-		doc,
-		func(stack *Stack) (Floats, error) {
-			elems, err := stack.PopN(2)
-			if err != nil {
-				return nil, err
-			}
-			result := f(elems[0], elems[1])
-			return Floats{result}, nil
-		},
-	}
-}
-
-func wrapTernaryOp(name, doc string, f func(float64, float64, float64) float64) Op {
-	return Op{
-		name,
-		doc,
-		func(stack *Stack) (Floats, error) {
-			elems, err := stack.PopN(3)
-			if err != nil {
-				return nil, err
-			}
-			result := f(elems[0], elems[1], elems[2])
-			return Floats{result}, nil
-		},
-	}
 }
 
 var (
@@ -350,6 +307,41 @@ var (
 		},
 	}
 
+	milOp = Op{
+		"mil",
+		"given yards to target and target speed in mph, return target speed in millradians per second (multiply result by time of flight for lead)",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopR(2)
+			if err != nil {
+				return nil, err
+			}
+			distance_yds := elems[0]
+			speed_mph := elems[1]
+			speed_yps := speed_mph * 1760.0 / 3600.0
+			mrads_per_s := 1000.0 * math.Atan(speed_yps/distance_yds)
+			return Floats{mrads_per_s}, nil
+		},
+	}
+
+	mphOp = Op{
+		"mph",
+		"given yards to target and target speed in millradians per second, return target speed in mph",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopR(2)
+			if err != nil {
+				return nil, err
+			}
+			distance_yds := elems[0]
+			mrads_per_s := elems[1]
+			rads_per_s := mrads_per_s / 1000.0
+			displacement_per_s := math.Tan(rads_per_s)
+			speed_yps := distance_yds * displacement_per_s
+			speed_mph := speed_yps * 3600.0 / 1760.0
+
+			return Floats{speed_mph}, nil
+		},
+	}
+
 	pow10Op = Op{
 		"pow10",
 		"10^stack.Top()",
@@ -440,6 +432,51 @@ var (
 	}
 )
 
+func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
+	return Op{
+		name,
+		doc,
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			result := f(top)
+			return Floats{result}, nil
+		},
+	}
+}
+
+func wrapBinaryOp(name, doc string, f func(float64, float64) float64) Op {
+	return Op{
+		name,
+		doc,
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopN(2)
+			if err != nil {
+				return nil, err
+			}
+			result := f(elems[0], elems[1])
+			return Floats{result}, nil
+		},
+	}
+}
+
+func wrapTernaryOp(name, doc string, f func(float64, float64, float64) float64) Op {
+	return Op{
+		name,
+		doc,
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopN(3)
+			if err != nil {
+				return nil, err
+			}
+			result := f(elems[0], elems[1], elems[2])
+			return Floats{result}, nil
+		},
+	}
+}
+
 /*
 func NewOpMap() OpMap {
 	ops := OpMap{
@@ -474,31 +511,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"mil": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, fmt.Errorf("distance_yds speed_mph")
-			}
-			distance_yds := elems[0]
-			speed_mph := elems[1]
-			speed_yps := speed_mph * 1760 / 3600
-			mrads_per_s := 1000 * math.Atan(speed_yps/distance_yds)
-			return mrads_per_s, nil
-		},
-		"mph": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, fmt.Errorf("distance_yds mrads_per_s")
-			}
-			distance_yds := elems[0]
-			mrads_per_s := elems[1]
-			rads_per_s := mrads_per_s / 1000.0
-			displacement_per_s := math.Tan(rads_per_s)
-			speed_yps := distance_yds * displacement_per_s
-			speed_mph := speed_yps * 3600.0 / 1760.0
-
-			return speed_mph, nil
-		},
 		"sum": func(stack *Stack) (float64, error) {
 			result := 0.0
 			for !stack.Empty() {
