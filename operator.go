@@ -110,6 +110,18 @@ var (
 		},
 	}
 
+	rightShiftOp = Op{
+		">>",
+		"right shift",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopR(2)
+			if err != nil {
+				return nil, err
+			}
+			return Floats{elems[0] / math.Pow(2, elems[1])}, nil
+		},
+	}
+
 	absOp = wrapUnaryOp("abs", "absolute value", math.Abs)
 
 	swapOp = Op{
@@ -136,6 +148,7 @@ func NewOpMap() OpMap {
 		"sw":   swapOp,
 		"swa":  swapOp,
 		"swap": swapOp,
+		">>":   rightShiftOp,
 	}
 
 	return ops
@@ -143,13 +156,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"<<": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return elems[0] * math.Pow(2, elems[1]), nil
-		},
 		">>": func(stack *Stack) (float64, error) {
 			elems, err := stack.PopR(2)
 			if err != nil {

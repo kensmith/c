@@ -81,6 +81,16 @@ func TestLeftShift(t *testing.T) {
 	assertClose(t, 4936, stack.Top())
 }
 
+func TestRightShift(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(1234)
+	stack.Push(2)
+	err := tryOpCascade(">>", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 308.5, stack.Top())
+}
+
 /*
 func TestPlus(t *testing.T) {
 	stack := NewStack()
