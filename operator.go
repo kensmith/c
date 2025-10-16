@@ -107,6 +107,7 @@ func NewOps() Ops {
 			"j1":          wrapUnaryOp("j1", "order-one Bessel function of the first kind", math.J1),
 			"jf":          jfOp,
 			"jn":          jnOp,
+			"lg":          lgOp,
 			"log":         wrapUnaryOp("log", "natural logarithm", math.Log),
 			"log10":       wrapUnaryOp("log10", "decimal logarithm", math.Log10),
 			"log1p":       wrapUnaryOp("log1p", "natural logarithm of 1 plus its argument x. It is more accurate than log(1 + x) when x is near zero", math.Log1p),
@@ -415,6 +416,18 @@ var (
 		},
 	}
 
+	lgOp = Op{
+		"lg",
+		"liters to gallons conversion",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top / _lPerGal}, nil
+		},
+	}
+
 	lorOp = Op{
 		"lor",
 		"lorentz factor",
@@ -714,13 +727,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"lg": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top / _lPerGal, nil
-		},
 		"pk": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {
