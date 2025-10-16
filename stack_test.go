@@ -67,12 +67,12 @@ func TestClear(t *testing.T) {
 	assert.Equal(t, stack.Len(), 0, nil)
 }
 
-func TestStringer(t *testing.T) {
+func TestStringF(t *testing.T) {
 	stack := NewStack()
 	stack.Push(1)
 	stack.Push(2)
 	stack.Push(3)
-	assert.Equal(t, "[ 1  2  3 ]", stack.String())
+	assert.Equal(t, "[ 1.000000  2.000000  3.000000 ]", stack.StringF())
 }
 
 func TestSort(t *testing.T) {

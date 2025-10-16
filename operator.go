@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"os"
 	"slices"
 	"strings"
 
@@ -82,6 +83,9 @@ func NewOps() *Ops {
 			"atan2":       wrapBinaryOp("atan2", "tangent of y/x", math.Atan2),
 			"avg":         avgOp,
 			"c":           wrapConstant("c", "speed of light in m/s", 299792458),
+			"cl":          clearOp,
+			"clr":         clearOp,
+			"clear":       clearOp,
 			"cbrt":        wrapUnaryOp("cbrt", "cube root", math.Cbrt),
 			"ceil":        wrapUnaryOp("ceil", "least integer value greater than or equal to stack.Top()", math.Ceil),
 			"cf":          cfOp,
@@ -93,9 +97,11 @@ func NewOps() *Ops {
 			"erfc":        wrapUnaryOp("erfc", "complementary error function", math.Erfc),
 			"erfcinv":     wrapUnaryOp("erfcinv", "inverse of erfc", math.Erfcinv),
 			"erfinv":      wrapUnaryOp("erfinv", "inverse error function", math.Erfinv),
+			"exit":        qOp,
 			"exp":         wrapUnaryOp("exp", "e^x, the base-e exponential", math.Exp),
 			"exp2":        wrapUnaryOp("exp2", "2^x, the base-2 exponential", math.Exp2),
 			"expm1":       wrapUnaryOp("expm1", "e^x - 1, the base-e exponential of x minus 1. It is more accurate than exp - 1 when x is near zero", math.Expm1),
+			"f":           fOp,
 			"fc":          fcOp,
 			"fj":          fjOp,
 			"floor":       wrapUnaryOp("floor", "greatest integer value less than or equal to stack.Top()", math.Floor),
@@ -146,6 +152,7 @@ func NewOps() *Ops {
 			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
 			"pow10":       pow10Op,
 			"pr":          prOp,
+			"q":           qOp,
 			"r":           randOp,
 			"remainder":   wrapBinaryOp("remainder", "IEEE 754 floating-point remainder of x/y", math.Remainder),
 			"rn":          randNOp,
@@ -310,6 +317,24 @@ var (
 				return nil, err
 			}
 			return Floats{top*9/5 + 32}, nil
+		},
+	}
+
+	clearOp = Op{
+		"clear",
+		"remove everything from the stack",
+		func(stack *Stack) (Floats, error) {
+			stack.Clear()
+			return nil, nil
+		},
+	}
+
+	fOp = Op{
+		"f",
+		"print stack using %f",
+		func(stack *Stack) (Floats, error) {
+			fmt.Println(stack.StringF())
+			return nil, nil
 		},
 	}
 
@@ -621,6 +646,15 @@ var (
 				return nil, err
 			}
 			return Floats{29.9212524 * math.Pow(1-math.Pow(10, -5)*2.25577*(top/3.280839895), 5.25588)}, nil
+		},
+	}
+
+	qOp = Op{
+		"q",
+		"exit the program",
+		func(stack *Stack) (Floats, error) {
+			os.Exit(0)
+			return nil, nil
 		},
 	}
 
