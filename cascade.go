@@ -11,7 +11,7 @@ func tryCascade(line string, stack *Stack, operators OperatorMap) error {
 		return nil
 	}
 
-	err = tryCommands(line, stack)
+	err = tryCommands(line, stack, operators)
 	if err != nil {
 		return err
 	}

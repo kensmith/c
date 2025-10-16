@@ -4,8 +4,16 @@ import (
 	"os"
 )
 
-func tryCommands(line string, stack *Stack) error {
+func tryCommands(line string, stack *Stack, operators OperatorMap) error {
 	switch line {
+	case "h":
+		fallthrough
+	case "he":
+		fallthrough
+	case "hel":
+		fallthrough
+	case "help":
+		showHelp(operators)
 	case "sw":
 		fallthrough
 	case "swap":

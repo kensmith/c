@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+	"slices"
 
 	"github.com/eclesh/welford"
 )
 
 type (
-	Operator    func(*Stack) (float64, error)
+	Operator func(*Stack) (float64, error)
+
+	// should probably be a struct instead of a raw map given all of the helper functions
 	OperatorMap map[string]Operator
 )
 
@@ -480,4 +483,15 @@ func tryOperator(line string, stack *Stack, operators OperatorMap) error {
 		return nil
 	}
 	return fmt.Errorf("no operator '%s'", line)
+}
+
+func showHelp(operators OperatorMap) {
+	commands := make([]string, 0, len(operators))
+	for key := range operators {
+		commands = append(commands, key)
+	}
+	slices.Sort(commands)
+	for _, command := range commands {
+		fmt.Println(command)
+	}
 }
