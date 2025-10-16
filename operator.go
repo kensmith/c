@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"math"
 	"math/big"
+
+	"github.com/eclesh/welford"
 )
 
 type (
@@ -208,22 +210,47 @@ func NewOperatorMap() OperatorMap {
 			return result, nil
 		},
 		"avg": func(stack *Stack) (float64, error) {
-			result := 0.0
-			size := stack.Len()
-			for !stack.Empty() {
-				n, err := stack.Pop()
-				if err != nil {
-					break
-				}
-				result += n
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
 			}
-			return result / float64(size), nil
+			return stats.Mean(), nil
+		},
+		"sd": func(stack *Stack) (float64, error) {
+			if stack.Len() <= 1 {
+				return 0.0, nil
+			}
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return stats.Stddev(), nil
+		},
+		"var": func(stack *Stack) (float64, error) {
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return stats.Variance(), nil
 		},
 		"max": func(stack *Stack) (float64, error) {
-			return stack.Max(), nil
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return stats.Max(), nil
 		},
 		"min": func(stack *Stack) (float64, error) {
-			return stack.Min(), nil
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return stats.Min(), nil
 		},
 		"lor": func(stack *Stack) (float64, error) {
 			// lorentz
@@ -432,4 +459,18 @@ func installTernaryFunctions(operators OperatorMap) {
 			return tFunc(elems[0], elems[1], elems[2]), nil
 		}
 	}
+}
+
+func tryOperator(line string, stack *Stack, operators OperatorMap) error {
+	rawOperator, ok := operators[line]
+	if ok {
+		result, err := rawOperator(stack)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			stack.Push(result)
+		}
+		return nil
+	}
+	return fmt.Errorf("no operator '%s'", line)
 }

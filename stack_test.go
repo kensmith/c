@@ -51,7 +51,7 @@ func TestSwap(t *testing.T) {
 	stack.Push(1)
 	stack.Push(2)
 	stack.Push(3)
-	stack.Swap()
+	_ = stack.Swap()
 	results, err := stack.PopN(2)
 	assert.Nil(t, err)
 	assert.Equal(t, []float64{2, 3}, results)
@@ -75,24 +75,6 @@ func TestStringer(t *testing.T) {
 	assert.Equal(t, "[ 1  2  3 ]", stack.String())
 }
 
-func TestMax(t *testing.T) {
-	stack := NewStack()
-	stack.Push(1)
-	stack.Push(2)
-	stack.Push(100)
-	stack.Push(3)
-	assert.Equal(t, 100.0, stack.Max())
-}
-
-func TestMin(t *testing.T) {
-	stack := NewStack()
-	stack.Push(1)
-	stack.Push(2)
-	stack.Push(-100)
-	stack.Push(3)
-	assert.Equal(t, -100.0, stack.Min())
-}
-
 func TestSort(t *testing.T) {
 	stack := NewStack()
 	stack.Push(3)
@@ -100,4 +82,13 @@ func TestSort(t *testing.T) {
 	stack.Push(2)
 	stack.Sort()
 	assert.Equal(t, "[ 1  2  3 ]", stack.String())
+}
+
+func TestCopy(t *testing.T) {
+	stack := NewStack()
+	stack.Push(3)
+	stack.Push(1)
+	stack.Push(2)
+	arr := stack.Copy()
+	assert.Equal(t, []float64{3, 1, 2}, arr)
 }

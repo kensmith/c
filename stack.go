@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 	"slices"
 	"strings"
 )
@@ -11,8 +10,8 @@ type Stack struct {
 	storage []float64
 }
 
-func NewStack() *Stack {
-	return &Stack{}
+func NewStack() Stack {
+	return Stack{}
 }
 
 func (s *Stack) Push(value float64) {
@@ -86,6 +85,7 @@ func (s *Stack) String() string {
 	return b.String()
 }
 
+/*
 func (s *Stack) Max() float64 {
 	candidate := math.Inf(-1)
 	for _, n := range s.storage {
@@ -101,7 +101,14 @@ func (s *Stack) Min() float64 {
 	}
 	return candidate
 }
+*/
 
 func (s *Stack) Sort() {
 	slices.Sort(s.storage)
+}
+
+func (s *Stack) Copy() []float64 {
+	result := make([]float64, s.Len())
+	copy(result, s.storage)
+	return result
 }
