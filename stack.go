@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"slices"
+	"strings"
 )
 
 type Stack struct {
@@ -17,7 +19,15 @@ func (s *Stack) Push(value float64) {
 	s.storage = append(s.storage, value)
 }
 
-func (s *Stack) Pop(n int) ([]float64, error) {
+func (s *Stack) Pop() (float64, error) {
+	elems, err := s.PopN(1)
+	if err != nil {
+		return 0.0, err
+	}
+	return elems[0], err
+}
+
+func (s *Stack) PopN(n int) ([]float64, error) {
 	if len(s.storage) < n {
 		return nil, fmt.Errorf("insufficient stack")
 	}
@@ -31,7 +41,7 @@ func (s *Stack) Pop(n int) ([]float64, error) {
 }
 
 func (s *Stack) PopR(n int) ([]float64, error) {
-	result, err := s.Pop(n)
+	result, err := s.PopN(n)
 	if err != nil {
 		return nil, err
 	}
@@ -40,7 +50,7 @@ func (s *Stack) PopR(n int) ([]float64, error) {
 }
 
 func (s *Stack) Swap() error {
-	topTwo, err := s.Pop(2)
+	topTwo, err := s.PopN(2)
 	if err != nil {
 		return err
 	}
@@ -56,4 +66,42 @@ func (s *Stack) Clear() {
 
 func (s *Stack) Len() int {
 	return len(s.storage)
+}
+
+func (s *Stack) Empty() bool {
+	return s.Len() <= 0
+}
+
+func (s *Stack) String() string {
+	stackSize := s.Len()
+	var b strings.Builder
+	fmt.Fprintf(&b, "[ ")
+	for i, n := range s.storage {
+		fmt.Fprintf(&b, "%g", n)
+		if i < stackSize-1 {
+			fmt.Fprintf(&b, "  ")
+		}
+	}
+	fmt.Fprintf(&b, " ]")
+	return b.String()
+}
+
+func (s *Stack) Max() float64 {
+	candidate := math.Inf(-1)
+	for _, n := range s.storage {
+		candidate = math.Max(candidate, n)
+	}
+	return candidate
+}
+
+func (s *Stack) Min() float64 {
+	candidate := math.Inf(1)
+	for _, n := range s.storage {
+		candidate = math.Min(candidate, n)
+	}
+	return candidate
+}
+
+func (s *Stack) Sort() {
+	slices.Sort(s.storage)
 }

@@ -19,15 +19,15 @@ func TestPop(t *testing.T) {
 	stack.Push(1)
 	stack.Push(2)
 	stack.Push(3)
-	results, err := stack.Pop(3)
+	results, err := stack.PopN(3)
 	assert.Nil(t, err)
-	assert.Equal(t, []float64{3, 2, 1}, results, nil)
+	assert.Equal(t, []float64{3, 2, 1}, results)
 	stack.Push(1)
 	stack.Push(2)
 	stack.Push(3)
-	results, err = stack.Pop(2)
+	results, err = stack.PopN(2)
 	assert.Nil(t, err)
-	assert.Equal(t, []float64{3, 2}, results, nil)
+	assert.Equal(t, []float64{3, 2}, results)
 }
 
 func TestPopR(t *testing.T) {
@@ -37,13 +37,13 @@ func TestPopR(t *testing.T) {
 	stack.Push(3)
 	results, err := stack.PopR(3)
 	assert.Nil(t, err)
-	assert.Equal(t, []float64{1, 2, 3}, results, nil)
+	assert.Equal(t, []float64{1, 2, 3}, results)
 	stack.Push(1)
 	stack.Push(2)
 	stack.Push(3)
 	results, err = stack.PopR(2)
 	assert.Nil(t, err)
-	assert.Equal(t, []float64{2, 3}, results, nil)
+	assert.Equal(t, []float64{2, 3}, results)
 }
 
 func TestSwap(t *testing.T) {
@@ -52,9 +52,9 @@ func TestSwap(t *testing.T) {
 	stack.Push(2)
 	stack.Push(3)
 	stack.Swap()
-	results, err := stack.Pop(2)
+	results, err := stack.PopN(2)
 	assert.Nil(t, err)
-	assert.Equal(t, []float64{2, 3}, results, nil)
+	assert.Equal(t, []float64{2, 3}, results)
 }
 
 func TestClear(t *testing.T) {
@@ -65,4 +65,39 @@ func TestClear(t *testing.T) {
 	assert.Equal(t, stack.Len(), 3, nil)
 	stack.Clear()
 	assert.Equal(t, stack.Len(), 0, nil)
+}
+
+func TestStringer(t *testing.T) {
+	stack := NewStack()
+	stack.Push(1)
+	stack.Push(2)
+	stack.Push(3)
+	assert.Equal(t, "[ 1  2  3 ]", stack.String())
+}
+
+func TestMax(t *testing.T) {
+	stack := NewStack()
+	stack.Push(1)
+	stack.Push(2)
+	stack.Push(100)
+	stack.Push(3)
+	assert.Equal(t, 100.0, stack.Max())
+}
+
+func TestMin(t *testing.T) {
+	stack := NewStack()
+	stack.Push(1)
+	stack.Push(2)
+	stack.Push(-100)
+	stack.Push(3)
+	assert.Equal(t, -100.0, stack.Min())
+}
+
+func TestSort(t *testing.T) {
+	stack := NewStack()
+	stack.Push(3)
+	stack.Push(1)
+	stack.Push(2)
+	stack.Sort()
+	assert.Equal(t, "[ 1  2  3 ]", stack.String())
 }

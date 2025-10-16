@@ -7,7 +7,6 @@ import (
 	"math/big"
 	"os"
 	"path/filepath"
-	"slices"
 	"strconv"
 	"strings"
 
@@ -30,117 +29,74 @@ var (
 	_histFilename = filepath.Join(_histDirname, "history")
 )
 
-func pop1(stack *[]float64) (float64, error) {
-	size := len(*stack)
-	if size < 1 {
-		return 0.0, fmt.Errorf("insufficient stack")
-	}
-	top := (*stack)[size-1]
-	*stack = (*stack)[:size-1]
-	return top, nil
-}
-
-func pop2(stack *[]float64) (float64, float64, error) {
-	size := len(*stack)
-	if size < 2 {
-		return 0.0, 0.0, fmt.Errorf("insufficient stack")
-	}
-	rhs := (*stack)[size-1]
-	lhs := (*stack)[size-2]
-	*stack = (*stack)[:size-2]
-	return lhs, rhs, nil
-}
-
-func pop3(stack *[]float64) (float64, float64, float64, error) {
-	size := len(*stack)
-	if size < 3 {
-		return 0.0, 0.0, 0.0, fmt.Errorf("insufficient stack")
-	}
-	rhs := (*stack)[size-1]
-	mhs := (*stack)[size-2]
-	lhs := (*stack)[size-3]
-	*stack = (*stack)[:size-3]
-	return lhs, mhs, rhs, nil
-}
-
-func swap(stack *[]float64) error {
-	lhs, rhs, err := pop2(stack)
-	if err != nil {
-		return err
-	}
-	*stack = append(*stack, rhs)
-	*stack = append(*stack, lhs)
-	return nil
-}
-
-type Operator func(*[]float64) (float64, error)
+type Operator func(*Stack) (float64, error)
 
 var operators = map[string]Operator{
-	"+": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"+": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, err
 		}
-		return lhs + rhs, nil
+		return elems[0] + elems[1], nil
 	},
-	"-": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"-": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, err
 		}
-		return lhs - rhs, nil
+		return elems[0] - elems[1], nil
 	},
-	"*": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"*": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, err
 		}
-		return lhs * rhs, nil
+		return elems[0] * elems[1], nil
 	},
-	"/": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"/": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, err
 		}
-		return lhs / rhs, nil
+		return elems[0] / elems[1], nil
 	},
-	"<<": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"<<": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, err
 		}
-		return lhs * math.Pow(2, rhs), nil
+		return elems[0] * math.Pow(2, elems[1]), nil
 	},
-	">>": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	">>": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, err
 		}
-		return lhs / math.Pow(2, rhs), nil
+		return elems[0] / math.Pow(2, elems[1]), nil
 	},
-	"!": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"!": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top * math.Gamma(top), nil
 	},
-	"++": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"++": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top + 1, nil
 	},
-	"--": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"--": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top - 1, nil
 	},
-	"rn": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"rn": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
@@ -150,22 +106,22 @@ var operators = map[string]Operator{
 		}
 		return float64(result.Int64()), nil
 	},
-	"r": func(stack *[]float64) (float64, error) {
+	"r": func(stack *Stack) (float64, error) {
 		result, err := rand.Int(rand.Reader, big.NewInt(int64(_defaultMaxRand)))
 		if err != nil {
 			return 0.0, err
 		}
 		return float64(result.Int64()), nil
 	},
-	"pow10": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"pow10": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return math.Pow10(int(top)), nil
 	},
-	"signbit": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"signbit": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
@@ -175,22 +131,22 @@ var operators = map[string]Operator{
 
 		return 0, nil
 	},
-	"neg": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"neg": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return -top, nil
 	},
-	"ilogb": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"ilogb": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return float64(math.Ilogb(top)), nil
 	},
-	"isinf": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"isinf": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
@@ -199,8 +155,8 @@ var operators = map[string]Operator{
 		}
 		return 0.0, nil
 	},
-	"isninf": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"isninf": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
@@ -209,8 +165,8 @@ var operators = map[string]Operator{
 		}
 		return 0.0, nil
 	},
-	"isnan": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"isnan": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
@@ -219,38 +175,38 @@ var operators = map[string]Operator{
 		}
 		return 0.0, nil
 	},
-	"jn": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"jn": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, err
 		}
-		return math.Jn(int(lhs), rhs), nil
+		return math.Jn(int(elems[0]), elems[1]), nil
 	},
-	"yn": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"yn": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, err
 		}
-		return math.Yn(int(lhs), rhs), nil
+		return math.Yn(int(elems[0]), elems[1]), nil
 	},
-	"mil": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"mil": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, fmt.Errorf("distance_yds speed_mph")
 		}
-		distance_yds := lhs
-		speed_mph := rhs
+		distance_yds := elems[0]
+		speed_mph := elems[1]
 		speed_yps := speed_mph * 1760 / 3600
 		mrads_per_s := 1000 * math.Atan(speed_yps/distance_yds)
 		return mrads_per_s, nil
 	},
-	"mph": func(stack *[]float64) (float64, error) {
-		lhs, rhs, err := pop2(stack)
+	"mph": func(stack *Stack) (float64, error) {
+		elems, err := stack.PopR(2)
 		if err != nil {
 			return 0.0, fmt.Errorf("distance_yds mrads_per_s")
 		}
-		distance_yds := lhs
-		mrads_per_s := rhs
+		distance_yds := elems[0]
+		mrads_per_s := elems[1]
 		rads_per_s := mrads_per_s / 1000.0
 		displacement_per_s := math.Tan(rads_per_s)
 		speed_yps := distance_yds * displacement_per_s
@@ -258,46 +214,38 @@ var operators = map[string]Operator{
 
 		return speed_mph, nil
 	},
-	"sum": func(stack *[]float64) (float64, error) {
+	"sum": func(stack *Stack) (float64, error) {
 		result := 0.0
-		for _, n := range *stack {
+		for !stack.Empty() {
+			n, err := stack.Pop()
+			if err != nil {
+				break
+			}
 			result += n
 		}
-		*stack = (*stack)[:0]
 		return result, nil
 	},
-	"avg": func(stack *[]float64) (float64, error) {
-		size := len(*stack)
+	"avg": func(stack *Stack) (float64, error) {
 		result := 0.0
-		for _, n := range *stack {
+		size := stack.Len()
+		for !stack.Empty() {
+			n, err := stack.Pop()
+			if err != nil {
+				break
+			}
 			result += n
 		}
-		*stack = (*stack)[:0]
 		return result / float64(size), nil
 	},
-	"max": func(stack *[]float64) (float64, error) {
-		candidate := math.Inf(-1)
-		for _, n := range *stack {
-			candidate = math.Max(candidate, n)
-		}
-		*stack = (*stack)[:0]
-		return candidate, nil
+	"max": func(stack *Stack) (float64, error) {
+		return stack.Max(), nil
 	},
-	"min": func(stack *[]float64) (float64, error) {
-		candidate := math.Inf(1)
-		for _, n := range *stack {
-			candidate = math.Min(candidate, n)
-		}
-		*stack = (*stack)[:0]
-		return candidate, nil
+	"min": func(stack *Stack) (float64, error) {
+		return stack.Min(), nil
 	},
-	"sort": func(stack *[]float64) (float64, error) {
-		slices.Sort(*stack)
-		return 0.0, fmt.Errorf("sorted")
-	},
-	"lor": func(stack *[]float64) (float64, error) {
+	"lor": func(stack *Stack) (float64, error) {
 		// lorentz
-		top, err := pop1(stack)
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
@@ -306,104 +254,104 @@ var operators = map[string]Operator{
 		c_sq := c * c
 		return 1.0 / math.Sqrt(1-top_sq/c_sq), nil
 	},
-	"fc": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"fc": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return (top - 32) * 5 / 9, nil
 	},
-	"cf": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"cf": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return (top * 9 / 5) + 32, nil
 	},
-	"fm": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"fm": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top / _ftPerM, nil
 	},
-	"mf": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"mf": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top * _ftPerM, nil
 	},
-	"fj": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"fj": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top * _jPerFtLb, nil
 	},
-	"jf": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"jf": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top / _jPerFtLb, nil
 	},
-	"gl": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"gl": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top * _lPerGal, nil
 	},
-	"lg": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"lg": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top / _lPerGal, nil
 	},
-	"pk": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"pk": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top * _pPerKg, nil
 	},
-	"kp": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"kp": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top / _pPerKg, nil
 	},
-	"hw": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"hw": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top * _wPerHp, nil
 	},
-	"wh": func(stack *[]float64) (float64, error) {
-		top, err := pop1(stack)
+	"wh": func(stack *Stack) (float64, error) {
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return top / _wPerHp, nil
 	},
-	"pas": func(stack *[]float64) (float64, error) {
+	"pas": func(stack *Stack) (float64, error) {
 		// pasteurization time in seconds for a given temperature in fahrenheit
 		// derived from a curve fit of data
-		top, err := pop1(stack)
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
 		return math.Exp(top*-0.231) * 1.23e15 * 60, nil
 	},
-	"pr": func(stack *[]float64) (float64, error) {
+	"pr": func(stack *Stack) (float64, error) {
 		// base atmospheric pressure in inHg for a given elevation in feet
 		// 29.9212524*pow(1-pow(10, -5)*2.25577*(x/3.280839895), 5.25588)
 		// from https://www.engineeringtoolbox.com/air-altitude-pressure-d_462.html
-		top, err := pop1(stack)
+		top, err := stack.Pop()
 		if err != nil {
 			return 0.0, err
 		}
@@ -486,9 +434,15 @@ var constants = map[string]float64{
 }
 
 func main() {
+	for name, c := range constants {
+		operators[name] = func(stack *Stack) (float64, error) {
+			return c, nil
+		}
+	}
+
 	for name, uFunc := range unaryFunctions {
-		operators[name] = func(stack *[]float64) (float64, error) {
-			top, err := pop1(stack)
+		operators[name] = func(stack *Stack) (float64, error) {
+			top, err := stack.Pop()
 			if err != nil {
 				return 0.0, err
 			}
@@ -497,28 +451,22 @@ func main() {
 	}
 
 	for name, bFunc := range binaryFunctions {
-		operators[name] = func(stack *[]float64) (float64, error) {
-			lhs, rhs, err := pop2(stack)
+		operators[name] = func(stack *Stack) (float64, error) {
+			elems, err := stack.PopR(2)
 			if err != nil {
 				return 0.0, err
 			}
-			return bFunc(lhs, rhs), nil
+			return bFunc(elems[0], elems[1]), nil
 		}
 	}
 
 	for name, tFunc := range ternaryFunctions {
-		operators[name] = func(stack *[]float64) (float64, error) {
-			lhs, mhs, rhs, err := pop3(stack)
+		operators[name] = func(stack *Stack) (float64, error) {
+			elems, err := stack.PopR(3)
 			if err != nil {
 				return 0.0, err
 			}
-			return tFunc(lhs, mhs, rhs), nil
-		}
-	}
-
-	for name, c := range constants {
-		operators[name] = func(stack *[]float64) (float64, error) {
-			return c, nil
+			return tFunc(elems[0], elems[1], elems[2]), nil
 		}
 	}
 
@@ -546,7 +494,7 @@ func main() {
 		}
 	}()
 
-	stack := []float64{}
+	stack := Stack{}
 	env := map[string]any{
 		"stack": &stack,
 		"s":     &stack,
@@ -566,14 +514,14 @@ func main() {
 			if err != nil {
 				fmt.Println(err)
 			} else {
-				stack = append(stack, result)
+				stack.Push(result)
 			}
 		} else {
 			switch lineTrimmed {
 			case "sw":
 				fallthrough
 			case "swap":
-				err := swap(&stack)
+				err := stack.Swap()
 				if err != nil {
 					fmt.Println(err)
 					continue
@@ -581,17 +529,19 @@ func main() {
 			case "p":
 				fallthrough
 			case "pop":
-				_, err := pop1(&stack)
+				_, err := stack.Pop()
 				if err != nil {
 					fmt.Println(err)
 					continue
 				}
+			case "sort":
+				stack.Sort()
 			case "cl":
 				fallthrough
 			case "clr":
 				fallthrough
 			case "clear":
-				stack = stack[:0]
+				stack.Clear()
 			case "q":
 				return
 			default:
@@ -607,19 +557,9 @@ func main() {
 					// not pushing to the stack
 					continue
 				}
-				stack = append(stack, value)
+				stack.Push(value)
 			}
 		}
-		stackSize := len(stack)
-		var b strings.Builder
-		fmt.Fprintf(&b, "[ ")
-		for i, n := range stack {
-			fmt.Fprintf(&b, "%g", n)
-			if i < stackSize-1 {
-				fmt.Fprintf(&b, "  ")
-			}
-		}
-		fmt.Fprintf(&b, " ]> ")
-		shell.SetPrompt(b.String())
+		shell.SetPrompt(stack.String() + "> ")
 	}
 }
