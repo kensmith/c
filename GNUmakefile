@@ -22,8 +22,8 @@ all\
   $(sec) \
   $(vuln) \
   $(scc) \
-; cat $(scc) \
-; cat $(test)
+; cat $(test) \
+; cat $(scc)
 
 .PHONY: deep
 deep \
