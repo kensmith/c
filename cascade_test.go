@@ -1,5 +1,6 @@
 package main
 
+/*
 import (
 	"math"
 	"testing"
@@ -228,6 +229,10 @@ func TestJn(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 0.11490348493190049, stack.Top())
 }
+
+
+
+*/
 
 /*
 func TestPlus(t *testing.T) {

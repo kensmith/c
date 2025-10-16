@@ -1,5 +1,6 @@
 package main
 
+/*
 func tryOpCascade(line string, stack *Stack, ops OpMap) error {
 	err := tryOp(line, stack, ops)
 	if err != nil {
@@ -8,6 +9,7 @@ func tryOpCascade(line string, stack *Stack, ops OpMap) error {
 
 	return nil
 }
+*/
 
 func tryCascade(line string, stack *Stack, operators OperatorMap) error {
 	err := tryExpr(line, stack)

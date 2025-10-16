@@ -20,9 +20,11 @@ import (
  */
 
 type (
-	Floats       []float64
-	Operator     func(*Stack) (float64, error)
-	OperatorMap  map[string]Operator
+	Operator    func(*Stack) (float64, error)
+	OperatorMap map[string]Operator
+
+	Floats []float64
+
 	OperatorFunc func(*Stack) (Floats, error)
 
 	Op struct {
@@ -32,7 +34,26 @@ type (
 	}
 
 	OpMap map[string]Op
+
+	Ops struct {
+		opmap OpMap
+	}
 )
+
+func (o *Ops) Run(line string, stack *Stack) error {
+	op, ok := o.opmap[line]
+	if ok {
+		results, err := op.f(stack)
+		if err != nil {
+			return err
+		}
+		for _, result := range results {
+			stack.Push(result)
+		}
+		return nil
+	}
+	return fmt.Errorf("no operator '%s'", line)
+}
 
 func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
 	return Op{
@@ -299,6 +320,38 @@ var (
 	}
 )
 
+func NewOps() Ops {
+	ops := Ops{
+		opmap: OpMap{
+			"!":       factorialOp,
+			"*":       mulOp,
+			"+":       plusOp,
+			"++":      incrOp,
+			"-":       minusOp,
+			"--":      decrOp,
+			"/":       divOp,
+			"<<":      leftShiftOp,
+			">>":      rightShiftOp,
+			"abs":     wrapUnaryOp("abs", "absolute value", math.Abs),
+			"ilogb":   ilogbOp,
+			"isinf":   isInfOp,
+			"isnan":   isNanOp,
+			"isninf":  isNInfOp,
+			"jn":      jnOp,
+			"neg":     negOp,
+			"pow10":   pow10Op,
+			"r":       randOp,
+			"rn":      randNOp,
+			"signbit": signbitOp,
+			"sw":      swapOp,
+			"swa":     swapOp,
+			"swap":    swapOp,
+		},
+	}
+	return ops
+}
+
+/*
 func NewOpMap() OpMap {
 	ops := OpMap{
 		"!":       factorialOp,
@@ -328,6 +381,7 @@ func NewOpMap() OpMap {
 
 	return ops
 }
+*/
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
@@ -637,6 +691,7 @@ func installTernaryFunctions(operators OperatorMap) {
 	}
 }
 
+/*
 func tryOp(line string, stack *Stack, ops OpMap) error {
 	rawOp, ok := ops[line]
 	if ok {
@@ -651,6 +706,7 @@ func tryOp(line string, stack *Stack, ops OpMap) error {
 	}
 	return fmt.Errorf("no op '%s'", line)
 }
+*/
 
 func tryOperator(line string, stack *Stack, operators OperatorMap) error {
 	rawOperator, ok := operators[line]
