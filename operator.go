@@ -77,6 +77,7 @@ func NewOps() Ops {
 			"asinh":       wrapUnaryOp("asinh", "inverse hyperbolic sine ", math.Asinh),
 			"atan":        wrapUnaryOp("atan", "arctangent", math.Atan),
 			"atan2":       wrapBinaryOp("atan2", "tangent of y/x", math.Atan2),
+			"avg":         avgOp,
 			"cbrt":        wrapUnaryOp("cbrt", "cube root", math.Cbrt),
 			"ceil":        wrapUnaryOp("ceil", "least integer value greater than or equal to stack.Top()", math.Ceil),
 			"cos":         wrapUnaryOp("cos", "cosine", math.Cos),
@@ -121,6 +122,7 @@ func NewOps() Ops {
 			"sin":         wrapUnaryOp("sin", "sine", math.Sin),
 			"sinh":        wrapUnaryOp("sinh", "hyperbolic sine", math.Sinh),
 			"sqrt":        wrapUnaryOp("sqrt", "square root", math.Sqrt),
+			"sum":         sumOp,
 			"sw":          swapOp,
 			"swa":         swapOp,
 			"swap":        swapOp,
@@ -242,6 +244,19 @@ var (
 				return nil, err
 			}
 			return Floats{elems[0] / math.Pow(2, elems[1])}, nil
+		},
+	}
+
+	avgOp = Op{
+		"avg",
+		"average (mean) of the entire stack",
+		func(stack *Stack) (Floats, error) {
+			stats := welford.New()
+			arr := stack.Copy()
+			for _, n := range arr {
+				stats.Add(n)
+			}
+			return Floats{stats.Mean()}, nil
 		},
 	}
 
@@ -395,6 +410,19 @@ var (
 		},
 	}
 
+	sumOp = Op{
+		"sum",
+		"sum the entire stack",
+		func(stack *Stack) (Floats, error) {
+			arr := stack.Copy()
+			result := 0.0
+			for _, n := range arr {
+				result += n
+			}
+			return Floats{result}, nil
+		},
+	}
+
 	swapOp = Op{
 		"sw",
 		"swap the top two elements",
@@ -511,17 +539,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"sum": func(stack *Stack) (float64, error) {
-			result := 0.0
-			for !stack.Empty() {
-				n, err := stack.Pop()
-				if err != nil {
-					break
-				}
-				result += n
-			}
-			return result, nil
-		},
 		"avg": func(stack *Stack) (float64, error) {
 			stats := welford.New()
 			arr := stack.Copy()

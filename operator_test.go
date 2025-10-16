@@ -248,3 +248,27 @@ func TestMPH(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 2, stack.Top())
 }
+
+func TestSum(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	for i := range 5 {
+		stack.Push(float64(i))
+	}
+	err := ops.Run("sum", stack)
+	assert.Nil(t, err)
+	assertClose(t, 10, stack.Top())
+	assert.Equal(t, stack.Len(), 6)
+}
+
+func TestAvg(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	for i := range 6 {
+		stack.Push(float64(i))
+	}
+	err := ops.Run("avg", stack)
+	assert.Nil(t, err)
+	assertClose(t, 2.5, stack.Top())
+	assert.Equal(t, stack.Len(), 7)
+}
