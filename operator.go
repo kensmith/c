@@ -137,10 +137,12 @@ func NewOps() *Ops {
 			"nextafter":   wrapBinaryOp("nextafter", "next representable float64 value after x towards y", math.Nextafter),
 			"ninf":        wrapConstant("ninf", "negative infinity", math.Inf(-1)),
 			"noop":        noOp,
+			"p":           pOp,
 			"pas":         pasOp,
 			"phi":         wrapConstant("phi", "golden ratio", math.Phi),
 			"pi":          wrapConstant("pi", "ratio of a circle's circumference to its diameter", math.Pi),
 			"pk":          pkOp,
+			"pop":         pOp,
 			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
 			"pow10":       pow10Op,
 			"pr":          prOp,
@@ -153,6 +155,7 @@ func NewOps() *Ops {
 			"signbit":     signbitOp,
 			"sin":         wrapUnaryOp("sin", "sine", math.Sin),
 			"sinh":        wrapUnaryOp("sinh", "hyperbolic sine", math.Sinh),
+			"sort":        sortOp,
 			"sqrt":        wrapUnaryOp("sqrt", "square root", math.Sqrt),
 			"sqrt2":       wrapConstant("sqrt2", "square root of 2", math.Sqrt2),
 			"sqrte":       wrapConstant("sqrte", "square root of e", math.SqrtE),
@@ -563,6 +566,15 @@ var (
 		},
 	}
 
+	pOp = Op{
+		"p",
+		"pop an item from the stack",
+		func(stack *Stack) (Floats, error) {
+			_, _ = stack.Pop()
+			return nil, nil
+		},
+	}
+
 	pasOp = Op{
 		"pas",
 		"pasteurization time in seconds for a given temperature in fahrenheit",
@@ -665,6 +677,15 @@ var (
 				stats.Add(n)
 			}
 			return Floats{stats.Stddev()}, nil
+		},
+	}
+
+	sortOp = Op{
+		"sort",
+		"sort the entire stack",
+		func(stack *Stack) (Floats, error) {
+			stack.Sort()
+			return nil, nil
 		},
 	}
 

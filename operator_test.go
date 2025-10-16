@@ -505,3 +505,27 @@ func TestC(t *testing.T) {
 	assert.Nil(t, err)
 	assertClose(t, 299792458, stack.Top())
 }
+
+func TestP(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	for i := range 5 {
+		stack.Push(float64(i))
+	}
+	assert.Equal(t, 5, stack.Len())
+	err := ops.Run("p", stack)
+	assert.Nil(t, err)
+	assert.Equal(t, 4, stack.Len())
+}
+
+func TestSortOp(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	for i := range 5 {
+		stack.Push(4 - float64(i))
+	}
+	assertClose(t, 0.0, stack.Top())
+	err := ops.Run("sort", stack)
+	assert.Nil(t, err)
+	assert.Equal(t, 4.0, stack.Top())
+}

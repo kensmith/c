@@ -7,6 +7,8 @@ import (
 
 func tryCommands(line string, stack *Stack, ops *Ops) error {
 	switch line {
+	case "?":
+		fallthrough
 	case "h":
 		fallthrough
 	case "he":
@@ -15,20 +17,6 @@ func tryCommands(line string, stack *Stack, ops *Ops) error {
 		fallthrough
 	case "help":
 		fmt.Println(ops.Help())
-	case "sw":
-		fallthrough
-	case "swap":
-		err := stack.Swap()
-		if err != nil {
-			return err
-		}
-	case "p":
-		fallthrough
-	case "pop":
-		_, err := stack.Pop()
-		if err != nil {
-			return err
-		}
 	case "sort":
 		stack.Sort()
 	case "f":
