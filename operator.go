@@ -159,6 +159,18 @@ var (
 		},
 	}
 
+	randOp = Op{
+		"r",
+		fmt.Sprintf("random number from 0 to %d", _defaultMaxRand),
+		func(stack *Stack) (Floats, error) {
+			result, err := rand.Int(rand.Reader, big.NewInt(int64(_defaultMaxRand)))
+			if err != nil {
+				return nil, err
+			}
+			return Floats{float64(result.Int64())}, nil
+		},
+	}
+
 	randNOp = Op{
 		"rn",
 		"random number from 0 to stack.Top()",
@@ -200,6 +212,7 @@ func NewOpMap() OpMap {
 		"<<":   leftShiftOp,
 		">>":   rightShiftOp,
 		"abs":  wrapUnaryOp("abs", "absolute value", math.Abs),
+		"r":    randOp,
 		"rn":   randNOp,
 		"sw":   swapOp,
 		"swa":  swapOp,
@@ -211,24 +224,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"rn": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			result, err := rand.Int(rand.Reader, big.NewInt(int64(top)))
-			if err != nil {
-				return 0.0, err
-			}
-			return float64(result.Int64()), nil
-		},
-		"r": func(stack *Stack) (float64, error) {
-			result, err := rand.Int(rand.Reader, big.NewInt(int64(_defaultMaxRand)))
-			if err != nil {
-				return 0.0, err
-			}
-			return float64(result.Int64()), nil
-		},
 		"pow10": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {

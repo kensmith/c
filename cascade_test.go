@@ -128,6 +128,15 @@ func TestRandN(t *testing.T) {
 	assert.Less(t, stack.Top(), 100.0)
 }
 
+func TestRand(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	err := tryOpCascade("r", stack, ops)
+	assert.Nil(t, err)
+	assert.Greater(t, stack.Top(), 0.0)
+	assert.Less(t, stack.Top(), float64(_defaultMaxRand))
+}
+
 /*
 func TestPlus(t *testing.T) {
 	stack := NewStack()
