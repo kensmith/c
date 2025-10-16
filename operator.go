@@ -50,6 +50,18 @@ func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
 }
 
 var (
+	factorialOp = Op{
+		"!",
+		"factorial (kind of, by way of gamma function)",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top * math.Gamma(top)}, nil
+		},
+	}
+
 	mulOp = Op{
 		"*",
 		"multiplication",
@@ -71,6 +83,18 @@ var (
 				return nil, err
 			}
 			return Floats{elems[0] + elems[1]}, nil
+		},
+	}
+
+	incrOp = Op{
+		"++",
+		"increment",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{top + 1.0}, nil
 		},
 	}
 
@@ -122,8 +146,6 @@ var (
 		},
 	}
 
-	absOp = wrapUnaryOp("abs", "absolute value", math.Abs)
-
 	swapOp = Op{
 		"sw",
 		"swap the top two elements",
@@ -139,16 +161,18 @@ var (
 
 func NewOpMap() OpMap {
 	ops := OpMap{
+		"!":    factorialOp,
 		"*":    mulOp,
 		"+":    plusOp,
+		"++":   incrOp,
 		"-":    minusOp,
 		"/":    divOp,
 		"<<":   leftShiftOp,
-		"abs":  absOp,
+		">>":   rightShiftOp,
+		"abs":  wrapUnaryOp("abs", "absolute value", math.Abs),
 		"sw":   swapOp,
 		"swa":  swapOp,
 		"swap": swapOp,
-		">>":   rightShiftOp,
 	}
 
 	return ops
@@ -156,27 +180,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		">>": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return elems[0] / math.Pow(2, elems[1]), nil
-		},
-		"!": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top * math.Gamma(top), nil
-		},
-		"++": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return top + 1, nil
-		},
 		"--": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {

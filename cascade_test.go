@@ -91,6 +91,24 @@ func TestRightShift(t *testing.T) {
 	assertClose(t, 308.5, stack.Top())
 }
 
+func TestFactorial(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(10)
+	err := tryOpCascade("!", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 3628800, stack.Top())
+}
+
+func TestIncr(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(10)
+	err := tryOpCascade("++", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 11, stack.Top())
+}
+
 /*
 func TestPlus(t *testing.T) {
 	stack := NewStack()
