@@ -176,19 +176,57 @@ func TestIlogb(t *testing.T) {
 func TestIsInf(t *testing.T) {
 	stack := NewStack()
 	ops := NewOpMap()
+
 	stack.Push(math.Inf(1))
 	err := tryOpCascade("isinf", stack, ops)
 	assert.Nil(t, err)
 	assertClose(t, 1, stack.Top())
+
+	stack.Push(math.Inf(-1))
+	err = tryOpCascade("isinf", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 0, stack.Top())
 }
 
 func TestIsNInf(t *testing.T) {
 	stack := NewStack()
 	ops := NewOpMap()
-	stack.Push(math.Inf(-1))
+
+	stack.Push(math.Inf(1))
 	err := tryOpCascade("isninf", stack, ops)
 	assert.Nil(t, err)
+	assertClose(t, 0, stack.Top())
+
+	stack.Push(math.Inf(-1))
+	err = tryOpCascade("isninf", stack, ops)
+	assert.Nil(t, err)
 	assertClose(t, 1, stack.Top())
+}
+
+func TestIsNan(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+
+	stack.Push(math.NaN())
+	err := tryOpCascade("isnan", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 1, stack.Top())
+
+	stack.Push(0)
+	err = tryOpCascade("isnan", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 0, stack.Top())
+}
+
+func TestJn(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+
+	stack.Push(1)
+	stack.Push(2)
+	err := tryOpCascade("jn", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 0.11490348493190049, stack.Top())
 }
 
 /*

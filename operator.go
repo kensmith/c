@@ -184,6 +184,18 @@ var (
 		},
 	}
 
+	isNanOp = Op{
+		"isnan",
+		"1 if stack.Top() is NaN",
+		func(stack *Stack) (Floats, error) {
+			top := stack.Top()
+			if math.IsNaN(top) {
+				return Floats{1}, nil
+			}
+			return Floats{0}, nil
+		},
+	}
+
 	isNInfOp = Op{
 		"isninf",
 		"1 if stack.Top() is -Inf",
@@ -193,6 +205,19 @@ var (
 				return Floats{1}, nil
 			}
 			return Floats{0}, nil
+		},
+	}
+
+	jnOp = Op{
+		"jn",
+		"order-n Bessel function of the first kind",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopN(2)
+			if err != nil {
+				return nil, err
+			}
+			result := math.Jn(int(elems[0]), elems[1])
+			return Floats{result}, nil
 		},
 	}
 
@@ -288,7 +313,9 @@ func NewOpMap() OpMap {
 		"abs":     wrapUnaryOp("abs", "absolute value", math.Abs),
 		"ilogb":   ilogbOp,
 		"isinf":   isInfOp,
+		"isnan":   isNanOp,
 		"isninf":  isNInfOp,
+		"jn":      jnOp,
 		"neg":     negOp,
 		"pow10":   pow10Op,
 		"r":       randOp,
@@ -304,23 +331,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"isnan": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			if math.IsNaN(top) {
-				return 1.0, nil
-			}
-			return 0.0, nil
-		},
-		"jn": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return math.Jn(int(elems[0]), elems[1]), nil
-		},
 		"yn": func(stack *Stack) (float64, error) {
 			elems, err := stack.PopR(2)
 			if err != nil {
