@@ -15,7 +15,7 @@ type (
 )
 
 func NewOperatorMap() OperatorMap {
-	return OperatorMap{
+	operators := OperatorMap{
 		"+": func(stack *Stack) (float64, error) {
 			elems, err := stack.PopR(2)
 			if err != nil {
@@ -367,6 +367,13 @@ func NewOperatorMap() OperatorMap {
 			return 29.9212524 * math.Pow(1-math.Pow(10, -5)*2.25577*(top/3.280839895), 5.25588), nil
 		},
 	}
+
+	installUnaryFunctions(operators)
+	installBinaryFunctions(operators)
+	installTernaryFunctions(operators)
+	installConstants(operators)
+
+	return operators
 }
 
 var unaryFunctions = map[string]func(float64) float64{
