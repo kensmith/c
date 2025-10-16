@@ -18,6 +18,19 @@ func (s *Stack) Push(value float64) {
 	s.storage = append(s.storage, value)
 }
 
+func (s *Stack) Top() float64 {
+	size := len(s.storage)
+	if size < 1 {
+		return 0.0
+	}
+	return s.storage[size-1]
+}
+
+func (s *Stack) PopU() float64 {
+	elem, _ := s.Pop()
+	return elem
+}
+
 func (s *Stack) Pop() (float64, error) {
 	elems, err := s.PopN(1)
 	if err != nil {

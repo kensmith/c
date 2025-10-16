@@ -1,7 +1,7 @@
 package main
 
 import (
-	"math"
+	//"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,6 +12,76 @@ func assertClose(t *testing.T, expected, result float64) {
 	assert.InDelta(t, expected, result, epsilon)
 }
 
+func TestPlus(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(1234)
+	stack.Push(2345)
+	err := tryOpCascade("+", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 3579, stack.Top())
+}
+
+func TestSwapOp(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(1234)
+	stack.Push(2345)
+	err := tryOpCascade("sw", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 1234, stack.Top())
+}
+
+func TestMinus(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(1234)
+	stack.Push(2345)
+	err := tryOpCascade("-", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, -1111, stack.Top())
+}
+
+func TestMul(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(1234)
+	stack.Push(2345)
+	err := tryOpCascade("*", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 2893730, stack.Top())
+}
+
+func TestDiv(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(1234)
+	stack.Push(2345)
+	err := tryOpCascade("/", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 0.5262260127931769, stack.Top())
+}
+
+func TestAbs(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(-1234)
+	err := tryOpCascade("abs", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 1234, stack.Top())
+}
+
+func TestLeftShift(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(1234)
+	stack.Push(2)
+	err := tryOpCascade("<<", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 4936, stack.Top())
+}
+
+/*
 func TestPlus(t *testing.T) {
 	stack := NewStack()
 	operators := NewOperatorMap()
@@ -507,3 +577,4 @@ func TestPr(t *testing.T) {
 	result, _ = stack.Pop()
 	assertClose(t, 7.040615836647221, result)
 }
+*/

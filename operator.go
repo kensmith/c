@@ -20,40 +20,129 @@ import (
  */
 
 type (
-	Operator    func(*Stack) (float64, error)
-	OperatorMap map[string]Operator
+	Floats       []float64
+	Operator     func(*Stack) (float64, error)
+	OperatorMap  map[string]Operator
+	OperatorFunc func(*Stack) (Floats, error)
+
+	Op struct {
+		name string
+		doc  string
+		f    OperatorFunc
+	}
+
+	OpMap map[string]Op
 )
+
+func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
+	return Op{
+		name,
+		doc,
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			result := f(top)
+			return Floats{result}, nil
+		},
+	}
+}
+
+var (
+	mulOp = Op{
+		"*",
+		"multiplication",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopR(2)
+			if err != nil {
+				return nil, err
+			}
+			return Floats{elems[0] * elems[1]}, nil
+		},
+	}
+
+	plusOp = Op{
+		"+",
+		"addition",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopR(2)
+			if err != nil {
+				return nil, err
+			}
+			return Floats{elems[0] + elems[1]}, nil
+		},
+	}
+
+	minusOp = Op{
+		"-",
+		"subtraction",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopR(2)
+			if err != nil {
+				return nil, err
+			}
+			return Floats{elems[0] - elems[1]}, nil
+		},
+	}
+
+	divOp = Op{
+		"/",
+		"division",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopR(2)
+			if err != nil {
+				return nil, err
+			}
+			return Floats{elems[0] / elems[1]}, nil
+		},
+	}
+
+	leftShiftOp = Op{
+		"<<",
+		"left shift",
+		func(stack *Stack) (Floats, error) {
+			elems, err := stack.PopR(2)
+			if err != nil {
+				return nil, err
+			}
+			return Floats{elems[0] * math.Pow(2, elems[1])}, nil
+		},
+	}
+
+	absOp = wrapUnaryOp("abs", "absolute value", math.Abs)
+
+	swapOp = Op{
+		"sw",
+		"swap the top two elements",
+		func(stack *Stack) (Floats, error) {
+			err := stack.Swap()
+			if err != nil {
+				return nil, err
+			}
+			return nil, nil
+		},
+	}
+)
+
+func NewOpMap() OpMap {
+	ops := OpMap{
+		"*":    mulOp,
+		"+":    plusOp,
+		"-":    minusOp,
+		"/":    divOp,
+		"<<":   leftShiftOp,
+		"abs":  absOp,
+		"sw":   swapOp,
+		"swa":  swapOp,
+		"swap": swapOp,
+	}
+
+	return ops
+}
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"+": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return elems[0] + elems[1], nil
-		},
-		"-": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return elems[0] - elems[1], nil
-		},
-		"*": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return elems[0] * elems[1], nil
-		},
-		"/": func(stack *Stack) (float64, error) {
-			elems, err := stack.PopR(2)
-			if err != nil {
-				return 0.0, err
-			}
-			return elems[0] / elems[1], nil
-		},
 		"<<": func(stack *Stack) (float64, error) {
 			elems, err := stack.PopR(2)
 			if err != nil {
@@ -480,6 +569,21 @@ func installTernaryFunctions(operators OperatorMap) {
 			return tFunc(elems[0], elems[1], elems[2]), nil
 		}
 	}
+}
+
+func tryOp(line string, stack *Stack, ops OpMap) error {
+	rawOp, ok := ops[line]
+	if ok {
+		results, err := rawOp.f(stack)
+		if err != nil {
+			return err
+		}
+		for _, result := range results {
+			stack.Push(result)
+		}
+		return nil
+	}
+	return fmt.Errorf("no op '%s'", line)
 }
 
 func tryOperator(line string, stack *Stack, operators OperatorMap) error {
