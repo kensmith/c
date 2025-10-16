@@ -146,6 +146,15 @@ func TestPow10(t *testing.T) {
 	assertClose(t, 1e10, stack.Top())
 }
 
+func TestSignbit(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(-10)
+	err := tryOpCascade("signbit", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 1, stack.Top())
+}
+
 /*
 func TestPlus(t *testing.T) {
 	stack := NewStack()

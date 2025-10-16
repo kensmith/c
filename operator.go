@@ -200,6 +200,18 @@ var (
 		},
 	}
 
+	signbitOp = Op{
+		"signbit",
+		"the sign bit of the number, 1 means negative, 0 positive",
+		func(stack *Stack) (Floats, error) {
+			top := stack.Top()
+			if math.Signbit(top) {
+				return Floats{1.0}, nil
+			}
+			return Floats{0.0}, nil
+		},
+	}
+
 	swapOp = Op{
 		"sw",
 		"swap the top two elements",
@@ -215,22 +227,23 @@ var (
 
 func NewOpMap() OpMap {
 	ops := OpMap{
-		"!":     factorialOp,
-		"*":     mulOp,
-		"+":     plusOp,
-		"++":    incrOp,
-		"-":     minusOp,
-		"--":    decrOp,
-		"/":     divOp,
-		"<<":    leftShiftOp,
-		">>":    rightShiftOp,
-		"abs":   wrapUnaryOp("abs", "absolute value", math.Abs),
-		"pow10": pow10Op,
-		"r":     randOp,
-		"rn":    randNOp,
-		"sw":    swapOp,
-		"swa":   swapOp,
-		"swap":  swapOp,
+		"!":       factorialOp,
+		"*":       mulOp,
+		"+":       plusOp,
+		"++":      incrOp,
+		"-":       minusOp,
+		"--":      decrOp,
+		"/":       divOp,
+		"<<":      leftShiftOp,
+		">>":      rightShiftOp,
+		"abs":     wrapUnaryOp("abs", "absolute value", math.Abs),
+		"pow10":   pow10Op,
+		"r":       randOp,
+		"rn":      randNOp,
+		"signbit": signbitOp,
+		"sw":      swapOp,
+		"swa":     swapOp,
+		"swap":    swapOp,
 	}
 
 	return ops
@@ -238,24 +251,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"pow10": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return math.Pow10(int(top)), nil
-		},
-		"signbit": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			if math.Signbit(top) {
-				return 1, nil
-			}
-
-			return 0, nil
-		},
 		"neg": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {
