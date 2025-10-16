@@ -151,6 +151,7 @@ func NewOps() *Ops {
 			"sd":          sdOp,
 			"signbit":     signbitOp,
 			"sin":         wrapUnaryOp("sine", math.Sin),
+			"sincos":      sincosOp,
 			"sinh":        wrapUnaryOp("hyperbolic sine", math.Sinh),
 			"sort":        sortOp,
 			"sqrt":        wrapUnaryOp("square root", math.Sqrt),
@@ -694,6 +695,18 @@ var (
 				stats.Add(n)
 			}
 			return Floats{stats.Stddev()}, nil
+		},
+	}
+
+	sincosOp = Op{
+		"returns sin and cos",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			s, c := math.Sincos(top)
+			return Floats{s, c}, nil
 		},
 	}
 

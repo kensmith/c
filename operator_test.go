@@ -568,3 +568,16 @@ func TestModf(t *testing.T) {
 	_, _ = stack.Pop()
 	assertClose(t, 0.5678, stack.Top())
 }
+
+func TestSincos(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(math.Pi)
+	assert.Equal(t, 1, stack.Len())
+	err := ops.Run("sincos", stack)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, stack.Len())
+	assertClose(t, 0, stack.Top())
+	_, _ = stack.Pop()
+	assertClose(t, -1, stack.Top())
+}
