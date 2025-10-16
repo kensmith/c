@@ -2,13 +2,20 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"strconv"
 
 	"github.com/expr-lang/expr"
 )
 
 func tryExpr(line string, stack *Stack) error {
-	output, err := expr.Eval(line, nil)
+	localStack := stack.Copy()
+	slices.Reverse(localStack)
+	env := map[string]any{
+		"s": localStack,
+	}
+
+	output, err := expr.Eval(line, env)
 	if err != nil {
 		return err
 	}
