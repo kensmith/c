@@ -22,7 +22,8 @@ all\
   $(sec) \
   $(vuln) \
   $(scc) \
-; cat $(scc)
+; cat $(scc) \
+; cat $(test)
 
 .PHONY: deep
 deep \
@@ -44,7 +45,7 @@ $(binary) \
 $(test) \
 : $(binary) \
 | $(build-dir) \
-; go test -failfast -parallel=8 -count=2 -shuffle=on > $@ 2>&1 \
+; go test -cover -failfast -parallel=8 -count=2 -shuffle=on > $@ 2>&1 \
 ; exit_code=$$? \
 ; test $$exit_code -ne 0 && cat $@ \
 ; exit $$exit_code
