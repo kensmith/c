@@ -19,5 +19,6 @@ func tryExpr(line string, stack *Stack) error {
 		return err
 	}
 	stack.Push(value)
+
 	return nil
 }

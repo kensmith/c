@@ -14,27 +14,14 @@ import (
 
 // TODO add remaining math pkg funcs
 
-/*
-* Operator needs to remember:
-* - the stack
-* - the string which invokes it
-* - the function to invoke
-*   - this should return ([]float64, error)
-* - help text describing it for help display
- */
-
 type (
-	Operator    func(*Stack) (float64, error)
-	OperatorMap map[string]Operator
-
 	Floats []float64
 
 	OperatorFunc func(*Stack) (Floats, error)
 
 	Op struct {
-		name string
-		doc  string
-		f    OperatorFunc
+		doc string
+		f   OperatorFunc
 	}
 
 	OpMap map[string]Op
@@ -63,9 +50,9 @@ func NewOps() *Ops {
 	ops := Ops{
 		opmap: OpMap{
 			"!":           factorialOp,
-			"%":           wrapBinaryOp("%", "floating-point remainder of x/y", math.Mod),
+			"%":           wrapBinaryOp("floating-point remainder of x/y", math.Mod),
 			"*":           mulOp,
-			"**":          wrapBinaryOp("**", "x^y, the base-x exponential of y", math.Pow),
+			"**":          wrapBinaryOp("x^y, the base-x exponential of y", math.Pow),
 			"+":           plusOp,
 			"++":          incrOp,
 			"-":           minusOp,
@@ -73,112 +60,112 @@ func NewOps() *Ops {
 			"/":           divOp,
 			"<<":          leftShiftOp,
 			">>":          rightShiftOp,
-			"^":           wrapBinaryOp("^", "x^y, the base-x exponential of y", math.Pow),
-			"abs":         wrapUnaryOp("abs", "absolute value", math.Abs),
-			"acos":        wrapUnaryOp("acos", "arccosine, in radians", math.Acos),
-			"acosh":       wrapUnaryOp("acosh", "inverse hyperbolic cosine", math.Acosh),
-			"asin":        wrapUnaryOp("asin", "arcsine", math.Asin),
-			"asinh":       wrapUnaryOp("asinh", "inverse hyperbolic sine ", math.Asinh),
-			"atan":        wrapUnaryOp("atan", "arctangent", math.Atan),
-			"atan2":       wrapBinaryOp("atan2", "tangent of y/x", math.Atan2),
+			"^":           wrapBinaryOp("x^y, the base-x exponential of y", math.Pow),
+			"abs":         wrapUnaryOp("absolute value", math.Abs),
+			"acos":        wrapUnaryOp("arccosine, in radians", math.Acos),
+			"acosh":       wrapUnaryOp("inverse hyperbolic cosine", math.Acosh),
+			"asin":        wrapUnaryOp("arcsine", math.Asin),
+			"asinh":       wrapUnaryOp("inverse hyperbolic sine ", math.Asinh),
+			"atan":        wrapUnaryOp("arctangent", math.Atan),
+			"atan2":       wrapBinaryOp("tangent of y/x", math.Atan2),
 			"avg":         avgOp,
-			"c":           wrapConstant("c", "speed of light in m/s", 299792458),
+			"c":           wrapConstant("speed of light in m/s", 299792458),
 			"cl":          clearOp,
 			"clr":         clearOp,
 			"clear":       clearOp,
-			"cbrt":        wrapUnaryOp("cbrt", "cube root", math.Cbrt),
-			"ceil":        wrapUnaryOp("ceil", "least integer value greater than or equal to stack.Top()", math.Ceil),
+			"cbrt":        wrapUnaryOp("cube root", math.Cbrt),
+			"ceil":        wrapUnaryOp("least integer value greater than or equal to stack.Top()", math.Ceil),
 			"cf":          cfOp,
-			"cos":         wrapUnaryOp("cos", "cosine", math.Cos),
-			"cosh":        wrapUnaryOp("cosh", "hyperbolic cosine", math.Cosh),
-			"dim":         wrapBinaryOp("dim", "maximum of x-y or 0", math.Dim),
-			"e":           wrapConstant("e", "euler's constant", math.E),
-			"erf":         wrapUnaryOp("erf", "error function", math.Erf),
-			"erfc":        wrapUnaryOp("erfc", "complementary error function", math.Erfc),
-			"erfcinv":     wrapUnaryOp("erfcinv", "inverse of erfc", math.Erfcinv),
-			"erfinv":      wrapUnaryOp("erfinv", "inverse error function", math.Erfinv),
+			"cos":         wrapUnaryOp("cosine", math.Cos),
+			"cosh":        wrapUnaryOp("hyperbolic cosine", math.Cosh),
+			"dim":         wrapBinaryOp("maximum of x-y or 0", math.Dim),
+			"e":           wrapConstant("euler's constant", math.E),
+			"erf":         wrapUnaryOp("error function", math.Erf),
+			"erfc":        wrapUnaryOp("complementary error function", math.Erfc),
+			"erfcinv":     wrapUnaryOp("inverse of erfc", math.Erfcinv),
+			"erfinv":      wrapUnaryOp("inverse error function", math.Erfinv),
 			"exit":        qOp,
-			"exp":         wrapUnaryOp("exp", "e^x, the base-e exponential", math.Exp),
-			"exp2":        wrapUnaryOp("exp2", "2^x, the base-2 exponential", math.Exp2),
-			"expm1":       wrapUnaryOp("expm1", "e^x - 1, the base-e exponential of x minus 1. It is more accurate than exp - 1 when x is near zero", math.Expm1),
+			"exp":         wrapUnaryOp("e^x, the base-e exponential", math.Exp),
+			"exp2":        wrapUnaryOp("2^x, the base-2 exponential", math.Exp2),
+			"expm1":       wrapUnaryOp("e^x - 1, the base-e exponential of x minus 1. It is more accurate than exp - 1 when x is near zero", math.Expm1),
 			"f":           fOp,
 			"fc":          fcOp,
 			"fj":          fjOp,
-			"floor":       wrapUnaryOp("floor", "greatest integer value less than or equal to stack.Top()", math.Floor),
+			"floor":       wrapUnaryOp("greatest integer value less than or equal to stack.Top()", math.Floor),
 			"fm":          fmOp,
-			"fma":         wrapTernaryOp("fma", "fused multiply-add of x, y, and z", math.FMA),
-			"gamma":       wrapUnaryOp("gamma", "gamma function ", math.Gamma),
+			"fma":         wrapTernaryOp("fused multiply-add of x, y, and z", math.FMA),
+			"gamma":       wrapUnaryOp("gamma function ", math.Gamma),
 			"gl":          glOp,
 			"hw":          hwOp,
-			"hypot":       wrapBinaryOp("hypot", "sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow", math.Hypot),
+			"hypot":       wrapBinaryOp("sqrt(p*p + q*q), taking care to avoid unnecessary overflow and underflow", math.Hypot),
 			"ilogb":       ilogbOp,
-			"inf":         wrapConstant("inf", "positive infinity", math.Inf(1)),
+			"inf":         wrapConstant("positive infinity", math.Inf(1)),
 			"isinf":       isInfOp,
 			"isnan":       isNanOp,
 			"isninf":      isNInfOp,
-			"j0":          wrapUnaryOp("j0", "order-zero Bessel function of the first kind", math.J0),
-			"j1":          wrapUnaryOp("j1", "order-one Bessel function of the first kind", math.J1),
+			"j0":          wrapUnaryOp("order-zero Bessel function of the first kind", math.J0),
+			"j1":          wrapUnaryOp("order-one Bessel function of the first kind", math.J1),
 			"jf":          jfOp,
 			"jn":          jnOp,
 			"kp":          kpOp,
 			"lg":          lgOp,
-			"ln2":         wrapConstant("ln2", "natural log of 2", math.Ln2),
-			"ln10":        wrapConstant("ln10", "natural log of 10", math.Ln10),
-			"log2e":       wrapConstant("log2e", "1 / ln2", math.Log2E),
-			"log10e":      wrapConstant("log10e", "1 / ln10", math.Log10E),
-			"log":         wrapUnaryOp("log", "natural logarithm", math.Log),
-			"log10":       wrapUnaryOp("log10", "decimal logarithm", math.Log10),
-			"log1p":       wrapUnaryOp("log1p", "natural logarithm of 1 plus its argument x. It is more accurate than log(1 + x) when x is near zero", math.Log1p),
-			"log2":        wrapUnaryOp("log2", "binary logarithm", math.Log2),
-			"logb":        wrapUnaryOp("logb", "binary exponent", math.Logb),
+			"ln2":         wrapConstant("natural log of 2", math.Ln2),
+			"ln10":        wrapConstant("natural log of 10", math.Ln10),
+			"log2e":       wrapConstant("1 / ln2", math.Log2E),
+			"log10e":      wrapConstant("1 / ln10", math.Log10E),
+			"log":         wrapUnaryOp("natural logarithm", math.Log),
+			"log10":       wrapUnaryOp("decimal logarithm", math.Log10),
+			"log1p":       wrapUnaryOp("natural logarithm of 1 plus its argument x. It is more accurate than log(1 + x) when x is near zero", math.Log1p),
+			"log2":        wrapUnaryOp("binary logarithm", math.Log2),
+			"logb":        wrapUnaryOp("binary exponent", math.Logb),
 			"lor":         lorOp,
 			"max":         maxOp,
 			"mf":          mfOp,
 			"mil":         milOp,
 			"min":         minOp,
-			"mod":         wrapBinaryOp("mod", "floating-point remainder of x/y", math.Mod),
+			"mod":         wrapBinaryOp("floating-point remainder of x/y", math.Mod),
 			"mph":         mphOp,
-			"nan":         wrapConstant("nan", "not a number", math.NaN()),
+			"nan":         wrapConstant("not a number", math.NaN()),
 			"neg":         negOp,
-			"nextafter":   wrapBinaryOp("nextafter", "next representable float64 value after x towards y", math.Nextafter),
-			"ninf":        wrapConstant("ninf", "negative infinity", math.Inf(-1)),
+			"nextafter":   wrapBinaryOp("next representable float64 value after x towards y", math.Nextafter),
+			"ninf":        wrapConstant("negative infinity", math.Inf(-1)),
 			"noop":        noOp,
 			"p":           pOp,
 			"pas":         pasOp,
-			"phi":         wrapConstant("phi", "golden ratio", math.Phi),
-			"pi":          wrapConstant("pi", "ratio of a circle's circumference to its diameter", math.Pi),
+			"phi":         wrapConstant("golden ratio", math.Phi),
+			"pi":          wrapConstant("ratio of a circle's circumference to its diameter", math.Pi),
 			"pk":          pkOp,
 			"pop":         pOp,
-			"pow":         wrapBinaryOp("pow", "x^y, the base-x exponential of y", math.Pow),
+			"pow":         wrapBinaryOp("x^y, the base-x exponential of y", math.Pow),
 			"pow10":       pow10Op,
 			"pr":          prOp,
 			"q":           qOp,
 			"r":           randOp,
-			"remainder":   wrapBinaryOp("remainder", "IEEE 754 floating-point remainder of x/y", math.Remainder),
+			"remainder":   wrapBinaryOp("IEEE 754 floating-point remainder of x/y", math.Remainder),
 			"rn":          randNOp,
-			"round":       wrapUnaryOp("round", "returns the nearest integer, rounding half away from zero", math.Round),
-			"roundtoeven": wrapUnaryOp("roundtoeven", "returns the nearest integer, rounding ties to even", math.RoundToEven),
+			"round":       wrapUnaryOp("returns the nearest integer, rounding half away from zero", math.Round),
+			"roundtoeven": wrapUnaryOp("returns the nearest integer, rounding ties to even", math.RoundToEven),
 			"sd":          sdOp,
 			"signbit":     signbitOp,
-			"sin":         wrapUnaryOp("sin", "sine", math.Sin),
-			"sinh":        wrapUnaryOp("sinh", "hyperbolic sine", math.Sinh),
+			"sin":         wrapUnaryOp("sine", math.Sin),
+			"sinh":        wrapUnaryOp("hyperbolic sine", math.Sinh),
 			"sort":        sortOp,
-			"sqrt":        wrapUnaryOp("sqrt", "square root", math.Sqrt),
-			"sqrt2":       wrapConstant("sqrt2", "square root of 2", math.Sqrt2),
-			"sqrte":       wrapConstant("sqrte", "square root of e", math.SqrtE),
-			"sqrtphi":     wrapConstant("sqrtphi", "square root of the golden ratio", math.SqrtPhi),
-			"sqrtpi":      wrapConstant("sqrtpi", "square root of pi", math.SqrtPi),
+			"sqrt":        wrapUnaryOp("square root", math.Sqrt),
+			"sqrt2":       wrapConstant("square root of 2", math.Sqrt2),
+			"sqrte":       wrapConstant("square root of e", math.SqrtE),
+			"sqrtphi":     wrapConstant("square root of the golden ratio", math.SqrtPhi),
+			"sqrtpi":      wrapConstant("square root of pi", math.SqrtPi),
 			"sum":         sumOp,
 			"sw":          swapOp,
 			"swa":         swapOp,
 			"swap":        swapOp,
-			"tan":         wrapUnaryOp("tan", "tangent", math.Tan),
-			"tanh":        wrapUnaryOp("tanh", "hyperbolic tangent", math.Tanh),
-			"trunc":       wrapUnaryOp("trunc", "integer value of stack.Top()", math.Trunc),
+			"tan":         wrapUnaryOp("tangent", math.Tan),
+			"tanh":        wrapUnaryOp("hyperbolic tangent", math.Tanh),
+			"trunc":       wrapUnaryOp("integer value of stack.Top()", math.Trunc),
 			"var":         varOp,
 			"wh":          whOp,
-			"y0":          wrapUnaryOp("y0", "order-zero Bessel function of the second kind", math.Y0),
-			"y1":          wrapUnaryOp("y1", "order-one Bessel function of the second kind", math.Y1),
+			"y0":          wrapUnaryOp("order-zero Bessel function of the second kind", math.Y0),
+			"y1":          wrapUnaryOp("order-one Bessel function of the second kind", math.Y1),
 			"yn":          ynOp,
 		},
 	}
@@ -187,7 +174,6 @@ func NewOps() *Ops {
 
 var (
 	factorialOp = Op{
-		"!",
 		"factorial (kind of, by way of gamma function)",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -199,7 +185,6 @@ var (
 	}
 
 	mulOp = Op{
-		"*",
 		"multiplication",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopR(2)
@@ -211,7 +196,6 @@ var (
 	}
 
 	plusOp = Op{
-		"+",
 		"addition",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopR(2)
@@ -223,7 +207,6 @@ var (
 	}
 
 	incrOp = Op{
-		"++",
 		"increment",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -235,7 +218,6 @@ var (
 	}
 
 	minusOp = Op{
-		"-",
 		"subtraction",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopR(2)
@@ -247,7 +229,6 @@ var (
 	}
 
 	decrOp = Op{
-		"--",
 		"decrement",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -260,7 +241,6 @@ var (
 	}
 
 	divOp = Op{
-		"/",
 		"division",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopR(2)
@@ -272,7 +252,6 @@ var (
 	}
 
 	leftShiftOp = Op{
-		"<<",
 		"left shift",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopR(2)
@@ -284,7 +263,6 @@ var (
 	}
 
 	rightShiftOp = Op{
-		">>",
 		"right shift",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopR(2)
@@ -296,7 +274,6 @@ var (
 	}
 
 	avgOp = Op{
-		"avg",
 		"average (mean) of the entire stack",
 		func(stack *Stack) (Floats, error) {
 			stats := welford.New()
@@ -309,7 +286,6 @@ var (
 	}
 
 	cfOp = Op{
-		"cf",
 		"celcius to fahrenheit conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -321,7 +297,6 @@ var (
 	}
 
 	clearOp = Op{
-		"clear",
 		"remove everything from the stack",
 		func(stack *Stack) (Floats, error) {
 			stack.Clear()
@@ -330,7 +305,6 @@ var (
 	}
 
 	fOp = Op{
-		"f",
 		"print stack using %f",
 		func(stack *Stack) (Floats, error) {
 			fmt.Println(stack.StringF())
@@ -339,7 +313,6 @@ var (
 	}
 
 	fcOp = Op{
-		"fc",
 		"fahrenheit to celcius conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -351,7 +324,6 @@ var (
 	}
 
 	fjOp = Op{
-		"fj",
 		"foot-lbs to joules conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -363,7 +335,6 @@ var (
 	}
 
 	fmOp = Op{
-		"fm",
 		"feet to meters conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -375,7 +346,6 @@ var (
 	}
 
 	glOp = Op{
-		"gl",
 		"gallons to liters conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -387,7 +357,6 @@ var (
 	}
 
 	hwOp = Op{
-		"hw",
 		"horsepower to watts conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -399,7 +368,6 @@ var (
 	}
 
 	ilogbOp = Op{
-		"ilogb",
 		"binary exponent of stack.Top()",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -412,7 +380,6 @@ var (
 	}
 
 	isInfOp = Op{
-		"isinf",
 		"1 if stack.Top() is +Inf",
 		func(stack *Stack) (Floats, error) {
 			top := stack.Top()
@@ -424,7 +391,6 @@ var (
 	}
 
 	isNanOp = Op{
-		"isnan",
 		"1 if stack.Top() is NaN",
 		func(stack *Stack) (Floats, error) {
 			top := stack.Top()
@@ -436,7 +402,6 @@ var (
 	}
 
 	isNInfOp = Op{
-		"isninf",
 		"1 if stack.Top() is -Inf",
 		func(stack *Stack) (Floats, error) {
 			top := stack.Top()
@@ -448,7 +413,6 @@ var (
 	}
 
 	jfOp = Op{
-		"jf",
 		"joules to foot-lbs conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -460,7 +424,6 @@ var (
 	}
 
 	jnOp = Op{
-		"jn",
 		"order-n Bessel function of the first kind",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopN(2)
@@ -473,7 +436,6 @@ var (
 	}
 
 	kpOp = Op{
-		"kp",
 		"kilograms to pounds conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -485,7 +447,6 @@ var (
 	}
 
 	lgOp = Op{
-		"lg",
 		"liters to gallons conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -497,7 +458,6 @@ var (
 	}
 
 	lorOp = Op{
-		"lor",
 		"lorentz factor",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -511,7 +471,6 @@ var (
 	}
 
 	maxOp = Op{
-		"max",
 		"find the maximum value of the entire stack",
 		func(stack *Stack) (Floats, error) {
 			stats := welford.New()
@@ -524,7 +483,6 @@ var (
 	}
 
 	mfOp = Op{
-		"mf",
 		"meters to feet conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -536,7 +494,6 @@ var (
 	}
 
 	milOp = Op{
-		"mil",
 		"given yards to target and target speed in mph, return target speed in millradians per second (multiply result by time of flight for lead)",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopR(2)
@@ -552,7 +509,6 @@ var (
 	}
 
 	minOp = Op{
-		"min",
 		"find the minimum value of the entire stack",
 		func(stack *Stack) (Floats, error) {
 			stats := welford.New()
@@ -565,7 +521,6 @@ var (
 	}
 
 	mphOp = Op{
-		"mph",
 		"given yards to target and target speed in millradians per second, return target speed in mph",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopR(2)
@@ -584,7 +539,6 @@ var (
 	}
 
 	noOp = Op{
-		"noop",
 		"no op",
 		func(stack *Stack) (Floats, error) {
 			return nil, nil
@@ -592,7 +546,6 @@ var (
 	}
 
 	pOp = Op{
-		"p",
 		"pop an item from the stack",
 		func(stack *Stack) (Floats, error) {
 			_, _ = stack.Pop()
@@ -601,7 +554,6 @@ var (
 	}
 
 	pasOp = Op{
-		"pas",
 		"pasteurization time in seconds for a given temperature in fahrenheit",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -613,7 +565,6 @@ var (
 	}
 
 	pkOp = Op{
-		"pk",
 		"pounds to kilograms conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -625,7 +576,6 @@ var (
 	}
 
 	pow10Op = Op{
-		"pow10",
 		"10^stack.Top()",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -638,7 +588,6 @@ var (
 	}
 
 	prOp = Op{
-		"pr",
 		"pressure in inHg for a given altitude in feet",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -650,7 +599,6 @@ var (
 	}
 
 	qOp = Op{
-		"q",
 		"exit the program",
 		func(stack *Stack) (Floats, error) {
 			os.Exit(0)
@@ -659,7 +607,6 @@ var (
 	}
 
 	randOp = Op{
-		"r",
 		fmt.Sprintf("random number from 0 to %d", _defaultMaxRand),
 		func(stack *Stack) (Floats, error) {
 			result, err := rand.Int(rand.Reader, big.NewInt(int64(_defaultMaxRand)))
@@ -671,7 +618,6 @@ var (
 	}
 
 	randNOp = Op{
-		"rn",
 		"random number from 0 to stack.Top()",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -687,7 +633,6 @@ var (
 	}
 
 	signbitOp = Op{
-		"signbit",
 		"the sign bit of the number, 1 means negative, 0 positive",
 		func(stack *Stack) (Floats, error) {
 			top := stack.Top()
@@ -699,7 +644,6 @@ var (
 	}
 
 	sdOp = Op{
-		"sd",
 		"standard deviation of the entire stack",
 		func(stack *Stack) (Floats, error) {
 			if stack.Len() <= 1 {
@@ -715,7 +659,6 @@ var (
 	}
 
 	sortOp = Op{
-		"sort",
 		"sort the entire stack",
 		func(stack *Stack) (Floats, error) {
 			stack.Sort()
@@ -724,7 +667,6 @@ var (
 	}
 
 	sumOp = Op{
-		"sum",
 		"sum the entire stack",
 		func(stack *Stack) (Floats, error) {
 			arr := stack.Copy()
@@ -737,7 +679,6 @@ var (
 	}
 
 	swapOp = Op{
-		"sw",
 		"swap the top two elements",
 		func(stack *Stack) (Floats, error) {
 			err := stack.Swap()
@@ -749,7 +690,6 @@ var (
 	}
 
 	negOp = Op{
-		"neg",
 		"negate stack.Top()",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -761,7 +701,6 @@ var (
 	}
 
 	varOp = Op{
-		"var",
 		"variance of the entire stack",
 		func(stack *Stack) (Floats, error) {
 			stats := welford.New()
@@ -774,7 +713,6 @@ var (
 	}
 
 	whOp = Op{
-		"wh",
 		"watts to horsepower conversion",
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -786,7 +724,6 @@ var (
 	}
 
 	ynOp = Op{
-		"yn",
 		"order-n Bessel function of the second kind",
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopN(2)
@@ -798,9 +735,8 @@ var (
 	}
 )
 
-func wrapConstant(name, doc string, value float64) Op {
+func wrapConstant(doc string, value float64) Op {
 	return Op{
-		name,
 		doc,
 		func(stack *Stack) (Floats, error) {
 			return Floats{value}, nil
@@ -808,9 +744,8 @@ func wrapConstant(name, doc string, value float64) Op {
 	}
 }
 
-func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
+func wrapUnaryOp(doc string, f func(float64) float64) Op {
 	return Op{
-		name,
 		doc,
 		func(stack *Stack) (Floats, error) {
 			top, err := stack.Pop()
@@ -823,9 +758,8 @@ func wrapUnaryOp(name, doc string, f func(float64) float64) Op {
 	}
 }
 
-func wrapBinaryOp(name, doc string, f func(float64, float64) float64) Op {
+func wrapBinaryOp(doc string, f func(float64, float64) float64) Op {
 	return Op{
-		name,
 		doc,
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopN(2)
@@ -838,9 +772,8 @@ func wrapBinaryOp(name, doc string, f func(float64, float64) float64) Op {
 	}
 }
 
-func wrapTernaryOp(name, doc string, f func(float64, float64, float64) float64) Op {
+func wrapTernaryOp(doc string, f func(float64, float64, float64) float64) Op {
 	return Op{
-		name,
 		doc,
 		func(stack *Stack) (Floats, error) {
 			elems, err := stack.PopN(3)
