@@ -159,6 +159,19 @@ var (
 		},
 	}
 
+	pow10Op = Op{
+		"pow10",
+		"10^stack.Top()",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			result := math.Pow10(int(top))
+			return Floats{result}, nil
+		},
+	}
+
 	randOp = Op{
 		"r",
 		fmt.Sprintf("random number from 0 to %d", _defaultMaxRand),
@@ -202,21 +215,22 @@ var (
 
 func NewOpMap() OpMap {
 	ops := OpMap{
-		"!":    factorialOp,
-		"*":    mulOp,
-		"+":    plusOp,
-		"++":   incrOp,
-		"-":    minusOp,
-		"--":   decrOp,
-		"/":    divOp,
-		"<<":   leftShiftOp,
-		">>":   rightShiftOp,
-		"abs":  wrapUnaryOp("abs", "absolute value", math.Abs),
-		"r":    randOp,
-		"rn":   randNOp,
-		"sw":   swapOp,
-		"swa":  swapOp,
-		"swap": swapOp,
+		"!":     factorialOp,
+		"*":     mulOp,
+		"+":     plusOp,
+		"++":    incrOp,
+		"-":     minusOp,
+		"--":    decrOp,
+		"/":     divOp,
+		"<<":    leftShiftOp,
+		">>":    rightShiftOp,
+		"abs":   wrapUnaryOp("abs", "absolute value", math.Abs),
+		"pow10": pow10Op,
+		"r":     randOp,
+		"rn":    randNOp,
+		"sw":    swapOp,
+		"swa":   swapOp,
+		"swap":  swapOp,
 	}
 
 	return ops
