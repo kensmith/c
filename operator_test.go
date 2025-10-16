@@ -538,7 +538,20 @@ func TestFrexp(t *testing.T) {
 	err := ops.Run("frexp", stack)
 	assert.Nil(t, err)
 	assert.Equal(t, 2, stack.Len())
-	assertClose(t, 11, stack.Top())
-	_, _ = stack.Pop()
 	assertClose(t, 0.60281630859375, stack.Top())
+	_, _ = stack.Pop()
+	assertClose(t, 11, stack.Top())
+}
+
+func TestLgamma(t *testing.T) {
+	stack := NewStack()
+	ops := NewOps()
+	stack.Push(1234.5678)
+	assert.Equal(t, 1, stack.Len())
+	err := ops.Run("lgamma", stack)
+	assert.Nil(t, err)
+	assert.Equal(t, 2, stack.Len())
+	assertClose(t, 7551.033504440956, stack.Top())
+	_, _ = stack.Pop()
+	assertClose(t, 1, stack.Top())
 }

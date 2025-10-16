@@ -38,8 +38,8 @@ func (o *Ops) Run(line string, stack *Stack) error {
 		if err != nil {
 			return err
 		}
-		for _, result := range results {
-			stack.Push(result)
+		for i := len(results) - 1; i >= 0; i-- {
+			stack.Push(results[i])
 		}
 		return nil
 	}
@@ -110,6 +110,7 @@ func NewOps() *Ops {
 			"jn":          jnOp,
 			"kp":          kpOp,
 			"lg":          lgOp,
+			"lgamma":      lgammaOp,
 			"ln2":         wrapConstant("natural log of 2", math.Ln2),
 			"ln10":        wrapConstant("natural log of 10", math.Ln10),
 			"log2e":       wrapConstant("1 / ln2", math.Log2E),
@@ -467,6 +468,18 @@ var (
 				return nil, err
 			}
 			return Floats{top / _lPerGal}, nil
+		},
+	}
+
+	lgammaOp = Op{
+		"natural logarithm with sign of gamma of stack.Top()",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			result, sign := math.Lgamma(top)
+			return Floats{result, float64(sign)}, nil
 		},
 	}
 
