@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 )
 
@@ -30,6 +31,8 @@ func tryCommands(line string, stack *Stack, operators OperatorMap) error {
 		}
 	case "sort":
 		stack.Sort()
+	case "f":
+		fmt.Println(stack.StringF())
 	case "cl":
 		fallthrough
 	case "clr":

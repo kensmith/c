@@ -71,18 +71,26 @@ func (s *Stack) Empty() bool {
 	return s.Len() <= 0
 }
 
-func (s *Stack) String() string {
+func (s *Stack) StringImpl(verb string) string {
 	stackSize := s.Len()
 	var b strings.Builder
 	fmt.Fprintf(&b, "[ ")
 	for i, n := range s.storage {
-		fmt.Fprintf(&b, "%g", n)
+		fmt.Fprintf(&b, verb, n)
 		if i < stackSize-1 {
 			fmt.Fprintf(&b, "  ")
 		}
 	}
 	fmt.Fprintf(&b, " ]")
 	return b.String()
+}
+
+func (s *Stack) String() string {
+	return s.StringImpl("%g")
+}
+
+func (s *Stack) StringF() string {
+	return s.StringImpl("%f")
 }
 
 func (s *Stack) Sort() {
