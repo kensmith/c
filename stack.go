@@ -10,8 +10,8 @@ type Stack struct {
 	storage []float64
 }
 
-func NewStack() Stack {
-	return Stack{}
+func NewStack() *Stack {
+	return &Stack{}
 }
 
 func (s *Stack) Push(value float64) {
