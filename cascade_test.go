@@ -1,7 +1,7 @@
 package main
 
 import (
-	//"math"
+	"math"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -171,6 +171,15 @@ func TestIlogb(t *testing.T) {
 	err := tryOpCascade("ilogb", stack, ops)
 	assert.Nil(t, err)
 	assertClose(t, 3, stack.Top())
+}
+
+func TestIsInf(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(math.Inf(1))
+	err := tryOpCascade("isinf", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 1, stack.Top())
 }
 
 /*
