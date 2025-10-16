@@ -126,6 +126,7 @@ func NewOps() *Ops {
 			"mil":         milOp,
 			"min":         minOp,
 			"mod":         wrapBinaryOp("floating-point remainder of x/y", math.Mod),
+			"modf":        modfOp,
 			"mph":         mphOp,
 			"nan":         wrapConstant("not a number", math.NaN()),
 			"neg":         negOp,
@@ -543,6 +544,18 @@ var (
 				stats.Add(n)
 			}
 			return Floats{stats.Min()}, nil
+		},
+	}
+
+	modfOp = Op{
+		"integer and fractional floating-point numbers that sum to f",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			whole, frac := math.Modf(top)
+			return Floats{whole, frac}, nil
 		},
 	}
 
