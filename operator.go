@@ -159,6 +159,19 @@ var (
 		},
 	}
 
+	ilogbOp = Op{
+		"ilogb",
+		"binary exponent of stack.Top()",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			result := float64(math.Ilogb(top))
+			return Floats{result}, nil
+		},
+	}
+
 	pow10Op = Op{
 		"pow10",
 		"10^stack.Top()",
@@ -223,6 +236,18 @@ var (
 			return nil, nil
 		},
 	}
+
+	negOp = Op{
+		"neg",
+		"negate stack.Top()",
+		func(stack *Stack) (Floats, error) {
+			top, err := stack.Pop()
+			if err != nil {
+				return nil, err
+			}
+			return Floats{-top}, nil
+		},
+	}
 )
 
 func NewOpMap() OpMap {
@@ -237,6 +262,8 @@ func NewOpMap() OpMap {
 		"<<":      leftShiftOp,
 		">>":      rightShiftOp,
 		"abs":     wrapUnaryOp("abs", "absolute value", math.Abs),
+		"ilogb":   ilogbOp,
+		"neg":     negOp,
 		"pow10":   pow10Op,
 		"r":       randOp,
 		"rn":      randNOp,
@@ -251,20 +278,6 @@ func NewOpMap() OpMap {
 
 func NewOperatorMap() OperatorMap {
 	operators := OperatorMap{
-		"neg": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return -top, nil
-		},
-		"ilogb": func(stack *Stack) (float64, error) {
-			top, err := stack.Pop()
-			if err != nil {
-				return 0.0, err
-			}
-			return float64(math.Ilogb(top)), nil
-		},
 		"isinf": func(stack *Stack) (float64, error) {
 			top, err := stack.Pop()
 			if err != nil {

@@ -155,6 +155,24 @@ func TestSignbit(t *testing.T) {
 	assertClose(t, 1, stack.Top())
 }
 
+func TestNeg(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(-10)
+	err := tryOpCascade("neg", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 10, stack.Top())
+}
+
+func TestIlogb(t *testing.T) {
+	stack := NewStack()
+	ops := NewOpMap()
+	stack.Push(-10)
+	err := tryOpCascade("ilogb", stack, ops)
+	assert.Nil(t, err)
+	assertClose(t, 3, stack.Top())
+}
+
 /*
 func TestPlus(t *testing.T) {
 	stack := NewStack()
