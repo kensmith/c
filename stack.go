@@ -73,7 +73,7 @@ func (s *Stack) Swap() error {
 }
 
 func (s *Stack) Clear() {
-	s.storage = s.storage[:0]
+	s.storage = []float64{}
 }
 
 func (s *Stack) Len() int {
